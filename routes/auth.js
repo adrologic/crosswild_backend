@@ -3,8 +3,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'crosswild-secret-key-2026';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@thecrosswild.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_EMAIL = 'admin@thecrosswild.com';
+const ADMIN_PASSWORD = 'admin123';
 
 // @desc    Admin login
 // @route   POST /api/auth/login
