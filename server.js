@@ -13,40 +13,28 @@ const app = express();
 connectDB();
 
 // Middleware
-// Configure helmet with relaxed settings for development
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false,
-}));
-app.use(compression()); // Compress responses
-app.use(morgan('dev')); // Logging
-
-// CORS configuration
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',')
-  : [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:5173',
-      'https://thecrosswild.com',
-      'https://www.thecrosswild.com',
-      'https://the-cross-wild-admin.vercel.app',
-    ];
-
+// CORS MUST be first — before helmet, before anything else
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (server-to-server, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-  },
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:5173',
+    'https://thecrosswild.com',
+    'https://www.thecrosswild.com',
+    'https://the-cross-wild-admin.vercel.app',
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+}));
+app.use(compression());
+app.use(morgan('dev'));
 
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
