@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireAdmin } = require('../middleware/auth');
 const {
   getAllBlogs,
   getBlog,
@@ -15,8 +16,8 @@ router.get('/stats', getBlogStats);
 router.get('/:id', getBlog);
 
 // Admin routes
-router.post('/', createBlog);
-router.put('/:id', updateBlog);
-router.delete('/:id', deleteBlog);
+router.post('/', requireAdmin, createBlog);
+router.put('/:id', requireAdmin, updateBlog);
+router.delete('/:id', requireAdmin, deleteBlog);
 
 module.exports = router;

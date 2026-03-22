@@ -5,16 +5,18 @@ const Order = require('../models/Order');
 // @access  Private/Admin
 exports.getAllOrders = async (req, res) => {
   try {
-    const { status, search, page = 1, limit = 50 } = req.query;
+    const { status, search, page = 1, limit: rawLimit = 50 } = req.query;
+    const limit = Math.min(Math.max(1, Number(rawLimit) || 50), 100);
 
     const query = {};
 
     if (status && status !== 'all') query.status = status;
     if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
-        { customerName: { $regex: search, $options: 'i' } },
-        { customerEmail: { $regex: search, $options: 'i' } },
+        { orderNumber: { $regex: escaped, $options: 'i' } },
+        { customerName: { $regex: escaped, $options: 'i' } },
+        { customerEmail: { $regex: escaped, $options: 'i' } },
       ];
     }
 

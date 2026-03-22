@@ -31,7 +31,11 @@ if (process.env.NODE_ENV === 'development') {
   }));
 } else {
   // Production: only allow specific origins
-  const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'];
+  const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
+    'https://thecrosswild.com',
+    'https://www.thecrosswild.com',
+    'https://crosswild-admin.vercel.app',
+  ];
   app.use(cors({
     origin: function(origin, callback) {
       if (!origin) return callback(null, true);
@@ -51,6 +55,7 @@ app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
 
 // Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/product-types', require('./routes/productTypes'));
 app.use('/api/blogs', require('./routes/blogs'));
@@ -96,25 +101,45 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(err.status || 500).json({
+  const statusCode = err.status || 500;
+  res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal server error',
+    message: process.env.NODE_ENV === 'production' && statusCode === 500
+      ? 'Internal server error'
+      : err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`\n🚀 Server is running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV}`);
   console.log(`🌐 API URL: http://localhost:${PORT}`);
   console.log(`✅ Health check: http://localhost:${PORT}/api/health\n`);
 });
 
+// Graceful shutdown
+const gracefulShutdown = (signal) => {
+  console.log(`\n${signal} received. Shutting down gracefully...`);
+  server.close(() => {
+    console.log('HTTP server closed.');
+    process.exit(0);
+  });
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    console.log('Forcing shutdown...');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.log(`❌ Error: ${err.message}`);
   console.log('Shutting down server due to unhandled promise rejection');
-  process.exit(1);
+  server.close(() => process.exit(1));
 });

@@ -6,7 +6,8 @@ const { uploadToImgBB } = require('../utils/imgbbUpload');
 // @access  Public
 exports.getAllBlogs = async (req, res) => {
   try {
-    const { search, tag, page = 1, limit = 20 } = req.query;
+    const { search, tag, page = 1, limit: rawLimit = 20 } = req.query;
+    const limit = Math.min(Math.max(1, Number(rawLimit) || 20), 100);
 
     const query = { isPublished: true };
 
@@ -38,15 +39,15 @@ exports.getAllBlogs = async (req, res) => {
 // @access  Public
 exports.getBlog = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id);
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
 
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
-
-    // Increment views
-    blog.views += 1;
-    await blog.save();
 
     res.json({ success: true, blog });
   } catch (error) {

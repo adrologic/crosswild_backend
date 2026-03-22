@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { requireAdmin } = require('../middleware/auth');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
 
 // Configure multer for memory storage
@@ -21,7 +22,7 @@ const upload = multer({
 // @desc    Upload image (multipart file)
 // @route   POST /api/upload
 // @access  Private/Admin
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', requireAdmin, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No image file provided' });
@@ -52,7 +53,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 // @desc    Upload image from base64
 // @route   POST /api/upload/base64
 // @access  Private/Admin
-router.post('/base64', async (req, res) => {
+router.post('/base64', requireAdmin, async (req, res) => {
   try {
     const { imageData, folder, category } = req.body;
 

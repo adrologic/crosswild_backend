@@ -146,6 +146,25 @@ Allow: /
 
 Sitemap: https://thecrosswild.com/sitemap.xml`,
   },
+  // LocalBusiness schema data
+  localBusiness: {
+    telephone: String,
+    email: String,
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: { type: String, default: 'IN' },
+    },
+    openingHours: { type: String, default: 'Mo-Sa 09:00-18:00' },
+    priceRange: { type: String, default: '₹₹' },
+  },
+  // FAQ items for FAQ schema
+  faqItems: [{
+    question: String,
+    answer: String,
+  }],
   // Additional meta tags
   additionalMetaTags: [{
     name: String,

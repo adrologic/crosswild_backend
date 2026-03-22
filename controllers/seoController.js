@@ -204,9 +204,10 @@ exports.generateSitemap = async (req, res) => {
 
     // Add product pages
     for (const product of products) {
+      const lastmod = product.updatedAt ? product.updatedAt.toISOString() : new Date().toISOString();
       sitemap += `  <url>
     <loc>${baseUrl}/products/${product._id}</loc>
-    <lastmod>${product.updatedAt.toISOString()}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -215,9 +216,10 @@ exports.generateSitemap = async (req, res) => {
 
     // Add blog pages
     for (const blog of blogs) {
+      const lastmod = blog.updatedAt ? blog.updatedAt.toISOString() : new Date().toISOString();
       sitemap += `  <url>
     <loc>${baseUrl}/blog/${blog._id}</loc>
-    <lastmod>${blog.updatedAt.toISOString()}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -248,6 +250,57 @@ Allow: /
 Sitemap: ${globalSettings.siteUrl}/sitemap.xml`);
   } catch (error) {
     res.status(500).send('User-agent: *\nAllow: /');
+  }
+};
+
+// ==================== SEO SCHEMAS ====================
+
+// @desc    Get LocalBusiness and FAQ schema data
+// @route   GET /api/seo/schemas
+// @access  Public
+exports.getSEOSchemas = async (req, res) => {
+  try {
+    const settings = await GlobalSEO.getSettings();
+    res.json({
+      success: true,
+      localBusiness: settings.localBusiness || null,
+      faqItems: settings.faqItems || [],
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update LocalBusiness and FAQ schema data
+// @route   PUT /api/seo/schemas
+// @access  Private/Admin
+exports.updateSEOSchemas = async (req, res) => {
+  try {
+    const { localBusiness, faqItems } = req.body;
+    let settings = await GlobalSEO.findOne();
+
+    if (!settings) {
+      settings = await GlobalSEO.create({ localBusiness, faqItems });
+    } else {
+      const updateData = {};
+      if (localBusiness !== undefined) updateData.localBusiness = localBusiness;
+      if (faqItems !== undefined) updateData.faqItems = faqItems;
+
+      settings = await GlobalSEO.findByIdAndUpdate(
+        settings._id,
+        updateData,
+        { new: true, runValidators: true }
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'SEO schemas updated successfully',
+      localBusiness: settings.localBusiness,
+      faqItems: settings.faqItems,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 

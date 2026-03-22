@@ -16,8 +16,10 @@ exports.getAllProducts = async (req, res) => {
       mostPopular,
       search,
       page = 1,
-      limit = 50
+      limit: rawLimit = 50
     } = req.query;
+
+    const limit = Math.min(Math.max(1, Number(rawLimit) || 50), 100);
 
     const query = { isActive: true };
 
@@ -75,15 +77,6 @@ exports.getProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // Debug: log what the DB has
-    console.log('── GET PRODUCT ──', product.name);
-    console.log('  sections:', JSON.stringify(product.sections));
-    console.log('  productCategories:', JSON.stringify(product.productCategories));
-    console.log('  colors:', JSON.stringify(product.colors));
-    console.log('  customFields:', JSON.stringify(product.customFields));
-    console.log('  sizes:', JSON.stringify(product.sizes));
-    console.log('  details:', JSON.stringify(product.details));
-
     res.json({ success: true, product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -96,14 +89,6 @@ exports.getProduct = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const productData = req.body;
-
-    // Debug: log what fields are received
-    console.log('── CREATE PRODUCT ── Received fields:', Object.keys(productData));
-    console.log('  sections:', JSON.stringify(productData.sections));
-    console.log('  productCategories:', JSON.stringify(productData.productCategories));
-    console.log('  colors:', JSON.stringify(productData.colors));
-    console.log('  customFields:', JSON.stringify(productData.customFields));
-    console.log('  sizes:', JSON.stringify(productData.sizes));
 
     // Remove empty productType to avoid ObjectId cast error
     if (!productData.productType) {
@@ -126,20 +111,12 @@ exports.createProduct = async (req, res) => {
 
     const product = await Product.create(productData);
 
-    // Debug: log what was saved
-    console.log('  SAVED product fields:', Object.keys(product.toObject()));
-    console.log('  SAVED sections:', JSON.stringify(product.sections));
-    console.log('  SAVED productCategories:', JSON.stringify(product.productCategories));
-    console.log('  SAVED colors:', JSON.stringify(product.colors));
-    console.log('  SAVED customFields:', JSON.stringify(product.customFields));
-
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
       product,
     });
   } catch (error) {
-    console.error('CREATE PRODUCT ERROR:', error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -156,13 +133,6 @@ exports.updateProduct = async (req, res) => {
     }
 
     const updateData = req.body;
-
-    // Debug: log what fields are being updated
-    console.log('── UPDATE PRODUCT ── Received fields:', Object.keys(updateData));
-    console.log('  sections:', JSON.stringify(updateData.sections));
-    console.log('  productCategories:', JSON.stringify(updateData.productCategories));
-    console.log('  colors:', JSON.stringify(updateData.colors));
-    console.log('  customFields:', JSON.stringify(updateData.customFields));
 
     // Remove empty productType to avoid ObjectId cast error
     if (!updateData.productType) {
@@ -189,19 +159,12 @@ exports.updateProduct = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    // Debug: log what was saved
-    console.log('  UPDATED product sections:', JSON.stringify(product.sections));
-    console.log('  UPDATED product productCategories:', JSON.stringify(product.productCategories));
-    console.log('  UPDATED product colors:', JSON.stringify(product.colors));
-    console.log('  UPDATED product customFields:', JSON.stringify(product.customFields));
-
     res.json({
       success: true,
       message: 'Product updated successfully',
       product,
     });
   } catch (error) {
-    console.error('UPDATE PRODUCT ERROR:', error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 };

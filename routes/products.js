@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireAdmin } = require('../middleware/auth');
 const {
   getAllProducts,
   getProduct,
@@ -14,9 +15,9 @@ router.get('/', getAllProducts);
 router.get('/stats', getProductStats);
 router.get('/:id', getProduct);
 
-// Admin routes (add auth middleware in production)
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+// Admin routes
+router.post('/', requireAdmin, createProduct);
+router.put('/:id', requireAdmin, updateProduct);
+router.delete('/:id', requireAdmin, deleteProduct);
 
 module.exports = router;
