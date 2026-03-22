@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
   const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
     'https://thecrosswild.com',
     'https://www.thecrosswild.com',
-    'https://crosswild-admin.vercel.app',
+    'https://the-cross-wild-admin.vercel.app',
   ];
   app.use(cors({
     origin: function(origin, callback) {
