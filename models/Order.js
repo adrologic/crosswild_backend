@@ -57,11 +57,10 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Generate order number before saving
-orderSchema.pre('save', function(next) {
+orderSchema.pre('save', function() {
   if (!this.orderNumber) {
     this.orderNumber = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
   }
-  next();
 });
 
 // Index for search and filtering

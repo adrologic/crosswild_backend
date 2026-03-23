@@ -71,14 +71,13 @@ const productTypeSchema = new mongoose.Schema({
 });
 
 // Auto-generate slug from name before saving
-productTypeSchema.pre('validate', function(next) {
+productTypeSchema.pre('validate', function() {
   if (this.name && !this.slug) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  next();
 });
 
 module.exports = mongoose.model('ProductType', productTypeSchema);

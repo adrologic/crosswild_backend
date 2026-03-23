@@ -150,11 +150,10 @@ const productSchema = new mongoose.Schema({
 });
 
 // Auto-populate category from first productCategories entry
-productSchema.pre('save', function (next) {
+productSchema.pre('save', function () {
   if (this.productCategories && this.productCategories.length > 0 && !this.category) {
     this.category = this.productCategories[0].category;
   }
-  next();
 });
 
 // Index for better search performance
