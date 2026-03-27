@@ -65,13 +65,23 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// @desc    Get single product
-// @route   GET /api/products/:id
+// @desc    Get single product by ID or slug
+// @route   GET /api/products/:idOrSlug
 // @access  Public
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate('productType', 'name slug icon detailFields hasSizes hasColors customSizes');
+    const { id } = req.params;
+    let product;
+
+    // Try by MongoDB ObjectId first, then by slug
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(id)
+        .populate('productType', 'name slug icon detailFields hasSizes hasColors customSizes');
+    }
+    if (!product) {
+      product = await Product.findOne({ slug: id })
+        .populate('productType', 'name slug icon detailFields hasSizes hasColors customSizes');
+    }
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });

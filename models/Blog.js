@@ -6,6 +6,13 @@ const blogSchema = new mongoose.Schema({
     required: [true, 'Blog title is required'],
     trim: true,
   },
+  slug: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
   paragraph: {
     type: String,
     required: [true, 'Blog content is required'],
@@ -57,11 +64,11 @@ const blogSchema = new mongoose.Schema({
   seo: {
     title: {
       type: String,
-      maxlength: 70,
+      maxlength: 120,
     },
     description: {
       type: String,
-      maxlength: 160,
+      maxlength: 300,
     },
     keywords: [{
       type: String,
@@ -72,9 +79,41 @@ const blogSchema = new mongoose.Schema({
     canonicalUrl: {
       type: String,
     },
+    otherMetaTags: {
+      type: String,
+      default: '',
+    },
+    noIndex: {
+      type: Boolean,
+      default: false,
+    },
+    noFollow: {
+      type: Boolean,
+      default: false,
+    },
+    structuredData: {
+      type: mongoose.Schema.Types.Mixed,
+    },
   },
 }, {
   timestamps: true,
+});
+
+// Auto-generate slug from title if not provided
+blogSchema.pre('save', async function () {
+  if (!this.slug && this.title) {
+    let baseSlug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    while (await mongoose.models.Blog.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
+  }
 });
 
 // Index for better search performance

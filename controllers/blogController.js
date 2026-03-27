@@ -34,16 +34,29 @@ exports.getAllBlogs = async (req, res) => {
   }
 };
 
-// @desc    Get single blog
-// @route   GET /api/blogs/:id
+// @desc    Get single blog by ID or slug
+// @route   GET /api/blogs/:idOrSlug
 // @access  Public
 exports.getBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { views: 1 } },
-      { new: true }
-    );
+    const { id } = req.params;
+    let blog;
+
+    // Try by MongoDB ObjectId first, then by slug
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      blog = await Blog.findByIdAndUpdate(
+        id,
+        { $inc: { views: 1 } },
+        { new: true }
+      );
+    }
+    if (!blog) {
+      blog = await Blog.findOneAndUpdate(
+        { slug: id },
+        { $inc: { views: 1 } },
+        { new: true }
+      );
+    }
 
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog not found' });

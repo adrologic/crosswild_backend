@@ -11,6 +11,19 @@ const productSchema = new mongoose.Schema({
     trim: true,
     default: '',
   },
+  sku: {
+    type: String,
+    trim: true,
+    default: '',
+    index: true,
+  },
+  slug: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
   description: {
     type: String,
     required: [true, 'Product description is required'],
@@ -129,11 +142,11 @@ const productSchema = new mongoose.Schema({
   seo: {
     title: {
       type: String,
-      maxlength: 70,
+      maxlength: 120,
     },
     description: {
       type: String,
-      maxlength: 160,
+      maxlength: 300,
     },
     keywords: [{
       type: String,
@@ -144,6 +157,21 @@ const productSchema = new mongoose.Schema({
     canonicalUrl: {
       type: String,
     },
+    otherMetaTags: {
+      type: String,
+      default: '',
+    },
+    noIndex: {
+      type: Boolean,
+      default: false,
+    },
+    noFollow: {
+      type: Boolean,
+      default: false,
+    },
+    structuredData: {
+      type: mongoose.Schema.Types.Mixed,
+    },
   },
 }, {
   timestamps: true,
@@ -153,6 +181,24 @@ const productSchema = new mongoose.Schema({
 productSchema.pre('save', function () {
   if (this.productCategories && this.productCategories.length > 0 && !this.category) {
     this.category = this.productCategories[0].category;
+  }
+});
+
+// Auto-generate slug from name if not provided
+productSchema.pre('save', async function () {
+  if (!this.slug && this.name) {
+    let baseSlug = this.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    // Ensure uniqueness
+    while (await mongoose.models.Product.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
   }
 });
 
