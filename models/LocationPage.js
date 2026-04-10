@@ -1,56 +1,69 @@
 const mongoose = require('mongoose');
 
-const productDetailSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  slug: { type: String, required: true },
-  icon: { type: String, default: '📦' },
-  link: { type: String, required: true },
-  types: [{ type: String }],
-  description: { type: String, default: '' },
-}, { _id: false });
-
-const locationContactSchema = new mongoose.Schema({
-  address: { type: String, default: '' },
-  phone: [{ type: String }],
-  email: { type: String, default: '' },
-  hours: { type: String, default: '' },
-  mapLink: { type: String, default: '' },
-}, { _id: false });
-
 const locationPageSchema = new mongoose.Schema({
-  // Core identity
-  name: { type: String, required: [true, 'Location name is required'], trim: true },
+  // ── Identity ────────────────────────────────────────────────────────────────
   slug: { type: String, required: [true, 'Slug is required'], trim: true, unique: true, lowercase: true },
-  state: { type: String, required: true, trim: true },
-  isHeadquarters: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
 
-  // Hero content
-  tagline: { type: String, default: '' },
-  heroHeading: { type: String, default: '' },
-  description: { type: String, default: '' },
+  // ── SEO Landing Page fields ─────────────────────────────────────────────────
+  h1:               { type: String, default: '' },
+  metaTitle:        { type: String, default: '' },
+  metaDescription:  { type: String, default: '' },
 
-  // Lists
-  whyChooseUs: [{ type: String }],
-  printingMethods: [{ type: String }],
-  fabrics: [{ type: String }],
-  partners: [{ type: String }],
+  city:             { type: String, default: '' },
+  category:         { type: String, default: '' },
+  categoryLabel:    { type: String, default: '' },
 
-  // Products offered at this location
-  products: [productDetailSchema],
+  introContent:     { type: String, default: '' },   // HTML
+  mainContent:      { type: String, default: '' },   // HTML
 
-  // Contact info
-  contact: { type: locationContactSchema, default: () => ({}) },
+  // CTA banner images shown mid-content (paths relative to /public)
+  pageImages:       [{ type: String }],
 
-  // SEO
+  // Product image slider (4-up carousel)
+  sliderImages:     [{ type: String }],
+
+  branchAddress:    { type: String, default: '' },
+  branchPhone:      { type: String, default: '' },
+  branchHours:      { type: String, default: '' },
+  mapLink:          { type: String, default: '' },
+  mapEmbed:         { type: String, default: '' },
+
+  image:            { type: String, default: '' },   // hero banner image URL
+
+  showPrintingMethods: { type: Boolean, default: false },
+  showFabrics:         { type: Boolean, default: false },
+  showSizeChart:       { type: Boolean, default: false },
+
+  printingMethods:  [{ type: String }],
+  fabrics:          [{ type: String }],
+
+  // ── Legacy city-page fields (kept so old records still read correctly) ──────
+  name:         { type: String, default: '' },
+  state:        { type: String, default: '' },
+  isHeadquarters: { type: Boolean, default: false },
+  tagline:      { type: String, default: '' },
+  heroHeading:  { type: String, default: '' },
+  description:  { type: String, default: '' },
+  whyChooseUs:  [{ type: String }],
+  partners:     [{ type: String }],
+
+  contact: {
+    address:  { type: String, default: '' },
+    phone:    [{ type: String }],
+    email:    { type: String, default: '' },
+    hours:    { type: String, default: '' },
+    mapLink:  { type: String, default: '' },
+  },
+
   seo: {
-    title: { type: String, default: '' },
-    description: { type: String, default: '' },
-    keywords: [{ type: String }],
-    ogImage: { type: String, default: '' },
+    title:        { type: String, default: '' },
+    description:  { type: String, default: '' },
+    keywords:     [{ type: String }],
+    ogImage:      { type: String, default: '' },
     canonicalUrl: { type: String, default: '' },
-    noIndex: { type: Boolean, default: false },
-    noFollow: { type: Boolean, default: false },
+    noIndex:      { type: Boolean, default: false },
+    noFollow:     { type: Boolean, default: false },
   },
 }, { timestamps: true });
 

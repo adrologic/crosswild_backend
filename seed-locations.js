@@ -23,7 +23,7 @@ if (!MONGODB_URI) {
 // ── SLUGS TO DELETE / REPLACE ──────────────────────────────────────────────
 const SLUGS_TO_DELETE = [
   'tshirt-manufacturer-in-jodhpur',
-  'bags-manufacturer-in-Jodhpur',
+  'bags-manufacturer-in-jodhpur',
   'bags-manufacturer-in-jodhpur',
   'cap-printing-manufacturer-jodhpur',
   'uniform-manufacturer-jodhpur',
@@ -32,9 +32,9 @@ const SLUGS_TO_DELETE = [
   'uniform-manufacturer-in-indore',
   'bags-manufacturing-company-in-udaipur',
   'tshirt-manufacturer-wholesaler-in-udaipur',
-  'tshirt-manufacturer-wholesaler-in-Kota',
   'tshirt-manufacturer-wholesaler-in-kota',
-  'bags-manufacturing-company-in-Kota',
+  'tshirt-manufacturer-wholesaler-in-kota',
+  'bags-manufacturing-company-in-kota',
   'bags-manufacturing-company-in-kota',
   'tshirt-manufacturer-wholesaler-in-sikar',
   'bags-manufacturing-company-in-sikar',
@@ -160,6 +160,10 @@ const LOCATION_PAGES = [
     showPrintingMethods: true,
     showFabrics: true,
     showSizeChart: true,
+    pageImages: [
+      '/images/fileBanners/indore/tshirt/indor-CTA-1.webp',
+      '/images/fileBanners/indore/tshirt/indor-CTA-2.webp',
+    ],
     introContent: `<p>What if you are looking for high quality custom t-shirt manufacturer in Indore City? The Cross Wild, one of the leading T-shirts manufacturing company in Indore, will realize your ideas with precision while ensuring style and affordability. From a startup company to a corporate brand or an event organizer, our custom-made T-shirts are a distinctive way to get noticed. For businesses, we cater to bulk manufacturing of T-shirts with almost everything from logo placements to bright, everlasting prints.</p>
 <p>We know that every brand is distinct, so at The Cross Wild, we offer an eclectic option of customizing from diverse fabrics to colors and sizes to designs, all manufactured from high-grade quality materials and well-advanced printing technology. Our house team ensures fast production and appropriate delivery without compromising quality.</p>
 <p>What makes us different? We are a company that offers comfort. Be it casual wear for employees or striking T-shirts for an occasion, we have all that. The best part is that you will be availing these services at an affordable price tailored for business houses in Indore and beyond. Partner us and see your brand identity born with every T-shirt created.</p>
@@ -182,6 +186,10 @@ const LOCATION_PAGES = [
     showPrintingMethods: false,
     showFabrics: false,
     showSizeChart: false,
+    pageImages: [
+      '/images/fileBanners/indore/bags/Laptop-CTA-banner.webp',
+      '/images/fileBanners/indore/bags/bags-banner-CTA.webp',
+    ],
     introContent: `<p>Are you in search of the perfect bags for your personal or business needs in Indore? For everyone, from small startups to large companies, The Cross Wild is a trusted custom bag manufacturing company in Indore offering tailor-made solutions for the brand or business. Our bag designs meet your requirements while keeping your brand identity in mind.</p>
 <p>At The Cross Wild, we manufacture all sorts of bags made with durable materials and expert craftsmanship: from fabric selection to your company name or logo, everything can be customized to reflect your style. Be it school bags, promotional offers, corporate office bags, food delivery bag or customer giveaways — we possess a wide variety.</p>
 <p>Our speciality is merging style, durability, and affordability. We maintain very affordable prices without compromising quality. Our Indore production facility accepts bulk and small orders, always with a fast turnaround time. For all your custom bag needs in Indore, The Cross Wild should be your partner of choice.</p>
@@ -204,6 +212,10 @@ const LOCATION_PAGES = [
     showPrintingMethods: false,
     showFabrics: false,
     showSizeChart: false,
+    pageImages: [
+      '/images/fileBanners/indore/uniform/School-uniform-CTA-banner.webp',
+      '/images/fileBanners/indore/uniform/office-uniform-cta-banner.webp',
+    ],
     introContent: `<p>If you are desperately looking for premium quality sports, school and staff uniforms in Indore to improve your business identity as well as team unity but also ensure that people look professional, then you need not look further than us. The Cross Wild is a trusted name in the industry among the leading uniform manufacturers and suppliers in Indore. We stand tall for providing durable, comfortable, and finely stitched uniforms for students and athletes. Our main objective is to provide custom uniform solutions that suit the different needs of schools and various sports institutions. Whether it is a school shirt or trousers and jerseys, count on us as your first resort for all your uniform needs.</p>
 <p>We have a team of highly expert people who specialize in creating modern designs. We don't only use high-quality fabrics but also pay attention to details when creating uniforms to meet the branding needs of the organizations. Whether it's bulk orders or smaller batches, The Cross Wild will serve all your purposes without letting you compromise on style, comfort, and quality.</p>
 <h2>Custom Uniforms for Hospital and Medical Staff in Indore at the Best Price</h2>

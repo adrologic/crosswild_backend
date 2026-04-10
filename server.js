@@ -14,16 +14,22 @@ connectDB();
 
 // Middleware
 // CORS MUST be first — before helmet, before anything else
+const ALLOWED_ORIGINS = [
+  'https://thecrosswild.com',
+  'https://www.thecrosswild.com',
+  'https://the-cross-wild-admin.vercel.app',
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:5173',
-    'https://thecrosswild.com',
-    'https://www.thecrosswild.com',
-    'https://the-cross-wild-admin.vercel.app',
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow any localhost port in development
+    if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+    // Allow specific production domains
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
