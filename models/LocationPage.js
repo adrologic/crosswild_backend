@@ -67,7 +67,6 @@ const locationPageSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-locationPageSchema.index({ slug: 1 });
 locationPageSchema.index({ isActive: 1 });
 
 module.exports = mongoose.model('LocationPage', locationPageSchema);
