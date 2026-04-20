@@ -182,14 +182,18 @@ exports.generateSitemap = async (req, res) => {
     ];
 
     // Get all active products
-    const products = await Product.find({ isActive: true }).select('_id updatedAt');
+    const products = await Product.find({ isActive: true }).select('_id slug updatedAt').lean();
 
     // Get all published blogs
-    const blogs = await Blog.find({ isPublished: true }).select('_id updatedAt');
+    const blogs = await Blog.find({ isPublished: true }).select('_id slug updatedAt').lean();
+
+    // Get page SEO paths for additional static pages
+    const pageSEOEntries = await PageSEO.find({ noIndex: { $ne: true } }).select('pagePath updatedAt').lean();
 
     // Build sitemap XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `;
 
     // Add static pages
@@ -202,11 +206,26 @@ exports.generateSitemap = async (req, res) => {
 `;
     }
 
-    // Add product pages
+    // Add pages from PageSEO (skip duplicates already in staticPages)
+    const staticUrls = new Set(staticPages.map(p => p.url));
+    for (const p of pageSEOEntries) {
+      if (staticUrls.has(p.pagePath)) continue;
+      const lastmod = p.updatedAt ? p.updatedAt.toISOString() : new Date().toISOString();
+      sitemap += `  <url>
+    <loc>${baseUrl}${p.pagePath}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+    }
+
+    // Add product pages — prefer slug over ID
     for (const product of products) {
+      const path = product.slug ? `/products/${product.slug}` : `/products/${product._id}`;
       const lastmod = product.updatedAt ? product.updatedAt.toISOString() : new Date().toISOString();
       sitemap += `  <url>
-    <loc>${baseUrl}/products/${product._id}</loc>
+    <loc>${baseUrl}${path}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -214,11 +233,12 @@ exports.generateSitemap = async (req, res) => {
 `;
     }
 
-    // Add blog pages
+    // Add blog pages — prefer slug over ID
     for (const blog of blogs) {
+      const path = blog.slug ? `/blog/${blog.slug}` : `/blog/${blog._id}`;
       const lastmod = blog.updatedAt ? blog.updatedAt.toISOString() : new Date().toISOString();
       sitemap += `  <url>
-    <loc>${baseUrl}/blog/${blog._id}</loc>
+    <loc>${baseUrl}${path}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -301,6 +321,184 @@ exports.updateSEOSchemas = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// ==================== CONTENT SEO (Product / Blog / Category) ====================
+
+// @desc    Get all content items with SEO status
+// @route   GET /api/seo/content-items
+// @access  Private/Admin
+exports.getContentItemsWithSEO = async (req, res) => {
+  try {
+    const Product  = require('../models/Product');
+    const Blog     = require('../models/Blog');
+    const Category = require('../models/Category');
+
+    const [products, blogs, categories] = await Promise.all([
+      Product.find({ isActive: true }).select('_id name title slug seo image').lean(),
+      Blog.find({ isPublished: true }).select('_id title slug seo image').lean(),
+      Category.find().select('_id id name seo image').lean(),
+    ]);
+
+    const normalise = (items) =>
+      items.map((item) => ({
+        _id:    item._id,
+        name:   item.title || item.name,
+        slug:   item.slug  || item.id,
+        image:  item.image,
+        hasSEO: !!(item.seo?.title && item.seo?.description),
+        seo:    item.seo || {},
+      }));
+
+    res.json({
+      success: true,
+      products:   normalise(products),
+      blogs:      normalise(blogs),
+      categories: normalise(categories),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update SEO for a single product
+// @route   PUT /api/seo/product/:id
+// @access  Private/Admin
+exports.updateProductSEO = async (req, res) => {
+  try {
+    const Product = require('../models/Product');
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: { seo: req.body } },
+      { new: true, runValidators: true }
+    ).select('name title slug seo');
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    res.json({ success: true, message: 'Product SEO updated', product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update SEO for a single blog
+// @route   PUT /api/seo/blog/:id
+// @access  Private/Admin
+exports.updateBlogSEO = async (req, res) => {
+  try {
+    const Blog = require('../models/Blog');
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { $set: { seo: req.body } },
+      { new: true, runValidators: true }
+    ).select('title slug seo');
+    if (!blog) return res.status(404).json({ success: false, message: 'Blog not found' });
+    res.json({ success: true, message: 'Blog SEO updated', blog });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update SEO for a single category
+// @route   PUT /api/seo/category/:id
+// @access  Private/Admin
+exports.updateCategorySEO = async (req, res) => {
+  try {
+    const Category = require('../models/Category');
+    const category = await Category.findByIdAndUpdate(
+      req.params.id,
+      { $set: { seo: req.body } },
+      { new: true, runValidators: true }
+    ).select('name id seo');
+    if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
+    res.json({ success: true, message: 'Category SEO updated', category });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Auto-generate SEO for all content missing it
+// @route   POST /api/seo/bulk-generate
+// @access  Private/Admin
+exports.bulkGenerateSEO = async (req, res) => {
+  try {
+    const Product  = require('../models/Product');
+    const Blog     = require('../models/Blog');
+    const Category = require('../models/Category');
+    const globalSettings = await GlobalSEO.getSettings();
+    const siteName = globalSettings.siteName || 'The CrossWild';
+
+    const missingFilter = {
+      $or: [
+        { 'seo.title': { $exists: false } },
+        { 'seo.title': '' },
+        { 'seo.title': null },
+      ],
+    };
+
+    let productsUpdated = 0, blogsUpdated = 0, categoriesUpdated = 0;
+
+    // --- Products ---
+    const products = await Product.find({ isActive: true, ...missingFilter });
+    for (const p of products) {
+      const name = p.title || p.name;
+      await Product.findByIdAndUpdate(p._id, {
+        $set: {
+          seo: {
+            title:       `${name} | Custom Manufacturing | ${siteName}`,
+            description: (p.shortDescription || (p.description || '').replace(/<[^>]+>/g, '')).slice(0, 160) ||
+                         `Buy ${name} online. Custom manufacturing with bulk pricing. Fast delivery across India.`,
+            keywords:    [name, p.category, 'manufacturer', 'custom', 'bulk', 'Jaipur', 'India'].filter(Boolean),
+            noIndex:     false,
+            noFollow:    false,
+          },
+        },
+      });
+      productsUpdated++;
+    }
+
+    // --- Blogs ---
+    const blogs = await Blog.find({ isPublished: true, ...missingFilter });
+    for (const b of blogs) {
+      await Blog.findByIdAndUpdate(b._id, {
+        $set: {
+          seo: {
+            title:       `${b.title} | ${siteName} Blog`,
+            description: (b.paragraph || '').replace(/<[^>]+>/g, '').slice(0, 160) ||
+                         `Read about ${b.title} on The CrossWild blog.`,
+            keywords:    [...(b.tags || []), siteName, 'blog'].filter(Boolean),
+            noIndex:     false,
+            noFollow:    false,
+          },
+        },
+      });
+      blogsUpdated++;
+    }
+
+    // --- Categories ---
+    const categories = await Category.find({ ...missingFilter });
+    for (const c of categories) {
+      await Category.findByIdAndUpdate(c._id, {
+        $set: {
+          seo: {
+            title:       `${c.name} Manufacturer & Supplier | ${siteName}`,
+            description: (c.description || '').slice(0, 160) ||
+                         `Buy custom ${c.name} in bulk. Best quality, competitive pricing, fast delivery across India.`,
+            keywords:    [c.name, 'manufacturer', 'custom', 'bulk', 'India', siteName].filter(Boolean),
+            noIndex:     false,
+            noFollow:    false,
+          },
+        },
+      });
+      categoriesUpdated++;
+    }
+
+    res.json({
+      success: true,
+      message: `SEO auto-generated — ${productsUpdated} products, ${blogsUpdated} blogs, ${categoriesUpdated} categories updated`,
+      updated: { products: productsUpdated, blogs: blogsUpdated, categories: categoriesUpdated },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

@@ -10,22 +10,22 @@ const pageSEOSchema = new mongoose.Schema({
   },
   title: {
     type: String,
-    maxlength: 70,
+    maxlength: 200,
   },
   description: {
     type: String,
-    maxlength: 160,
+    maxlength: 500,
   },
   keywords: [{
     type: String,
   }],
   ogTitle: {
     type: String,
-    maxlength: 70,
+    maxlength: 200,
   },
   ogDescription: {
     type: String,
-    maxlength: 200,
+    maxlength: 500,
   },
   ogImage: {
     type: String,
