@@ -6,13 +6,14 @@ const { uploadToImgBB } = require('../utils/imgbbUpload');
 // @access  Public
 exports.getAllBlogs = async (req, res) => {
   try {
-    const { search, tag, page = 1, limit: rawLimit = 20 } = req.query;
+    const { search, tag, showOnHome, page = 1, limit: rawLimit = 20 } = req.query;
     const limit = Math.min(Math.max(1, Number(rawLimit) || 20), 100);
 
     const query = { isPublished: true };
 
     if (search) query.$text = { $search: search };
     if (tag) query.tags = tag;
+    if (showOnHome === 'true') query.showOnHome = true;
 
     const blogs = await Blog.find(query)
       .sort({ createdAt: -1 })

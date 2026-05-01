@@ -56,6 +56,11 @@ const blogSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  showOnHome: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
   views: {
     type: Number,
     default: 0,
