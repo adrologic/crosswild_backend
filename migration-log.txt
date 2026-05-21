@@ -1,0 +1,176 @@
+[2026-05-21T12:32:27.500Z] 
+═══ PHASE 1: UPLOAD 73 URLs to Cloudinary ═══
+[2026-05-21T12:32:32.147Z]   ✓ https://www.thecrosswild.com/assets/front/images/logo.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366749/crosswild/seo/migrated/logo.jpg
+[2026-05-21T12:32:32.148Z]   ✓ https://www.thecrosswild.com/products_image/0b8beb77484360b93d7dbc3b66271df8.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366750/crosswild/products/migrated/0b8beb77484360b93d7dbc3b66271df8.jpg
+[2026-05-21T12:32:32.149Z]   ✓ https://www.thecrosswild.com/products_image/0c06d108827197660b14472a650fc036.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366749/crosswild/products/migrated/0c06d108827197660b14472a650fc036.jpg
+[2026-05-21T12:32:32.149Z]   ✓ https://www.thecrosswild.com/products_image/1110ab722cc416528eb7515635a9cc10.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366750/crosswild/products/migrated/1110ab722cc416528eb7515635a9cc10.jpg
+[2026-05-21T12:32:32.149Z]   ✓ https://www.thecrosswild.com/products_image/1ab794294005ed569e6b8093901e47b0.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366750/crosswild/products/migrated/1ab794294005ed569e6b8093901e47b0.jpg
+[2026-05-21T12:32:34.334Z]   ✓ https://www.thecrosswild.com/products_image/29789ee9122312588a1facf5f9bdc7dd.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366753/crosswild/products/migrated/29789ee9122312588a1facf5f9bdc7dd.jpg
+[2026-05-21T12:32:34.335Z]   ✓ https://www.thecrosswild.com/products_image/3512feaa31d0cd1cfe05786b57553eca.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366753/crosswild/products/migrated/3512feaa31d0cd1cfe05786b57553eca.jpg
+[2026-05-21T12:32:34.335Z]   ✓ https://www.thecrosswild.com/products_image/39ea10fad7bf4c8350a799b255d17567.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366753/crosswild/products/migrated/39ea10fad7bf4c8350a799b255d17567.jpg
+[2026-05-21T12:32:34.335Z]   ✓ https://www.thecrosswild.com/products_image/3a24a9801ed1dbdd1b4bf5d5d911eda2.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366753/crosswild/products/migrated/3a24a9801ed1dbdd1b4bf5d5d911eda2.jpg
+[2026-05-21T12:32:34.335Z]   ✓ https://www.thecrosswild.com/products_image/3e96df68e2f1770428e2495f8e7fe70b.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366753/crosswild/products/migrated/3e96df68e2f1770428e2495f8e7fe70b.jpg
+[2026-05-21T12:32:36.466Z]   ✓ https://www.thecrosswild.com/products_image/434c37ef79b102bd5c2e64df74df0828.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366755/crosswild/products/migrated/434c37ef79b102bd5c2e64df74df0828.jpg
+[2026-05-21T12:32:36.467Z]   ✓ https://www.thecrosswild.com/products_image/4baffe8b501fdf846f016305e9268e73.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366755/crosswild/products/migrated/4baffe8b501fdf846f016305e9268e73.jpg
+[2026-05-21T12:32:36.467Z]   ✓ https://www.thecrosswild.com/products_image/4c2c70e121e7476fa095c187b6ab2a2e.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366755/crosswild/products/migrated/4c2c70e121e7476fa095c187b6ab2a2e.jpg
+[2026-05-21T12:32:36.467Z]   ✓ https://www.thecrosswild.com/products_image/5173fbc952708f453b5e9bde8d2086b6.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366755/crosswild/products/migrated/5173fbc952708f453b5e9bde8d2086b6.jpg
+[2026-05-21T12:32:36.467Z]   ✓ https://www.thecrosswild.com/products_image/564e4a74f39c30ede3ea2f262debe4a4.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366755/crosswild/products/migrated/564e4a74f39c30ede3ea2f262debe4a4.jpg
+[2026-05-21T12:32:39.206Z]   ✓ https://www.thecrosswild.com/products_image/592988b5cab7ffe3bee30ea74ab70a76.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366757/crosswild/products/migrated/592988b5cab7ffe3bee30ea74ab70a76.jpg
+[2026-05-21T12:32:39.208Z]   ✓ https://www.thecrosswild.com/products_image/5da4f9acc5fc11aa068ceffe79add3b8.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366758/crosswild/products/migrated/5da4f9acc5fc11aa068ceffe79add3b8.jpg
+[2026-05-21T12:32:39.208Z]   ✓ https://www.thecrosswild.com/products_image/5e582bc24b0af8858daeaa4c41d4febf.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366757/crosswild/products/migrated/5e582bc24b0af8858daeaa4c41d4febf.jpg
+[2026-05-21T12:32:39.208Z]   ✓ https://www.thecrosswild.com/products_image/64967665b8a0a42eeff038a1a4da662b.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366757/crosswild/products/migrated/64967665b8a0a42eeff038a1a4da662b.jpg
+[2026-05-21T12:32:39.209Z]   ✓ https://www.thecrosswild.com/products_image/68b8fbc7dfab9d830a9e38d62f2502ac.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366757/crosswild/products/migrated/68b8fbc7dfab9d830a9e38d62f2502ac.jpg
+[2026-05-21T12:32:41.457Z]   ✓ https://www.thecrosswild.com/products_image/68ee7632b4a386af593eafa8458d17b8.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366760/crosswild/products/migrated/68ee7632b4a386af593eafa8458d17b8.jpg
+[2026-05-21T12:32:41.457Z]   ✓ https://www.thecrosswild.com/products_image/6f037be3dce207d89d5cdafd83cd28ce.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366760/crosswild/products/migrated/6f037be3dce207d89d5cdafd83cd28ce.jpg
+[2026-05-21T12:32:41.458Z]   ✓ https://www.thecrosswild.com/products_image/75d8c5aa82f17774857d95ffafd93fc1.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366760/crosswild/products/migrated/75d8c5aa82f17774857d95ffafd93fc1.jpg
+[2026-05-21T12:32:41.458Z]   ✓ https://www.thecrosswild.com/products_image/7a6ba77b5a3ca04de4ef9479825461d1.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366760/crosswild/products/migrated/7a6ba77b5a3ca04de4ef9479825461d1.jpg
+[2026-05-21T12:32:41.458Z]   ✓ https://www.thecrosswild.com/products_image/7ce7854d3bdabdb70d535cc6635b8a1e.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366760/crosswild/products/migrated/7ce7854d3bdabdb70d535cc6635b8a1e.jpg
+[2026-05-21T12:32:44.200Z]   ✓ https://www.thecrosswild.com/products_image/7ee58cd665ba15256c8e85808a85e7b6.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366762/crosswild/products/migrated/7ee58cd665ba15256c8e85808a85e7b6.jpg
+[2026-05-21T12:32:44.201Z]   ✓ https://www.thecrosswild.com/products_image/7f1647eee1a016d84f75ad7c00c4cc64.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366762/crosswild/products/migrated/7f1647eee1a016d84f75ad7c00c4cc64.jpg
+[2026-05-21T12:32:44.201Z]   ✓ https://www.thecrosswild.com/products_image/83cde8baeac2b07d58ccbc805f16ee53.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366762/crosswild/products/migrated/83cde8baeac2b07d58ccbc805f16ee53.jpg
+[2026-05-21T12:32:44.201Z]   ✓ https://www.thecrosswild.com/products_image/8ea195c9b0a741b7d76d1979a679dbc8.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366762/crosswild/products/migrated/8ea195c9b0a741b7d76d1979a679dbc8.jpg
+[2026-05-21T12:32:44.202Z]   ✓ https://www.thecrosswild.com/products_image/900af3a323036134f274d01d1bd2d79f.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366762/crosswild/products/migrated/900af3a323036134f274d01d1bd2d79f.jpg
+[2026-05-21T12:32:47.705Z]   ✓ https://www.thecrosswild.com/products_image/909a8a47ec773aab30a62f4842e7ece6.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366765/crosswild/products/migrated/909a8a47ec773aab30a62f4842e7ece6.jpg
+[2026-05-21T12:32:47.705Z]   ✓ https://www.thecrosswild.com/products_image/98475159d591ffdc68f5ed05821be0e9.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366765/crosswild/products/migrated/98475159d591ffdc68f5ed05821be0e9.jpg
+[2026-05-21T12:32:47.706Z]   ✓ https://www.thecrosswild.com/products_image/9ce74d413be46ea047b680b65e5c7aa6.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366765/crosswild/products/migrated/9ce74d413be46ea047b680b65e5c7aa6.jpg
+[2026-05-21T12:32:47.706Z]   ✓ https://www.thecrosswild.com/products_image/a34823c6ca08d69011b704e0e9551548.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366765/crosswild/products/migrated/a34823c6ca08d69011b704e0e9551548.jpg
+[2026-05-21T12:32:47.706Z]   ✓ https://www.thecrosswild.com/products_image/a9605470f8ab81052d979aaf10cbfcd1.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366765/crosswild/products/migrated/a9605470f8ab81052d979aaf10cbfcd1.jpg
+[2026-05-21T12:32:49.965Z]   ✓ https://www.thecrosswild.com/products_image/ac448874f5641fe053e423a219cd4ce0.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366768/crosswild/products/migrated/ac448874f5641fe053e423a219cd4ce0.jpg
+[2026-05-21T12:32:49.966Z]   ✓ https://www.thecrosswild.com/products_image/bdff08bbc4cc26f26aa9ff8f1918ef0d.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366768/crosswild/products/migrated/bdff08bbc4cc26f26aa9ff8f1918ef0d.jpg
+[2026-05-21T12:32:49.966Z]   ✓ https://www.thecrosswild.com/products_image/cd1ffc6104e185ecb2dfefd56ee0eb66.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366768/crosswild/products/migrated/cd1ffc6104e185ecb2dfefd56ee0eb66.jpg
+[2026-05-21T12:32:49.966Z]   ✓ https://www.thecrosswild.com/products_image/ceeca38033f62ddd520b10dbe95e1bba.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366769/crosswild/products/migrated/ceeca38033f62ddd520b10dbe95e1bba.jpg
+[2026-05-21T12:32:49.966Z]   ✓ https://www.thecrosswild.com/products_image/cf74faf07125a982b5aaf25d33a9f9c9.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366768/crosswild/products/migrated/cf74faf07125a982b5aaf25d33a9f9c9.jpg
+[2026-05-21T12:32:53.441Z]   ✓ https://www.thecrosswild.com/products_image/eacd5a023684aca00f9c8450c970c904.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366771/crosswild/products/migrated/eacd5a023684aca00f9c8450c970c904.jpg
+[2026-05-21T12:32:53.442Z]   ✓ https://www.thecrosswild.com/products_image/eb0859ce28338b9620490c7a94eb31b1.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366771/crosswild/products/migrated/eb0859ce28338b9620490c7a94eb31b1.jpg
+[2026-05-21T12:32:53.442Z]   ✓ https://www.thecrosswild.com/products_image/eb85bc3c535700dfb594d1d6751244ac.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366771/crosswild/products/migrated/eb85bc3c535700dfb594d1d6751244ac.jpg
+[2026-05-21T12:32:53.442Z]   ✓ https://www.thecrosswild.com/products_image/ebe8c56622667e5d29c12316b2f7e8b1.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366772/crosswild/products/migrated/ebe8c56622667e5d29c12316b2f7e8b1.jpg
+[2026-05-21T12:32:53.442Z]   ✓ https://www.thecrosswild.com/products_image/ec96c104e6f55f8814b9071a92156210.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366771/crosswild/products/migrated/ec96c104e6f55f8814b9071a92156210.jpg
+[2026-05-21T12:32:56.422Z]   ✓ https://www.thecrosswild.com/products_image/f244d9fe61a5fc9871b89bd5db5e9946.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366775/crosswild/products/migrated/f244d9fe61a5fc9871b89bd5db5e9946.jpg
+[2026-05-21T12:32:56.423Z]   ✓ https://www.thecrosswild.com/products_image/f5528e5386c99cd334f4dab763edbd92.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366774/crosswild/products/migrated/f5528e5386c99cd334f4dab763edbd92.jpg
+[2026-05-21T12:32:56.423Z]   ✓ https://www.thecrosswild.com/products_image/f59a0b7a5ea4504fa3b3bb09f753af1a.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366774/crosswild/products/migrated/f59a0b7a5ea4504fa3b3bb09f753af1a.jpg
+[2026-05-21T12:32:56.423Z]   ✓ https://www.thecrosswild.com/upload/blog/094764f1ca25e99212430fac136998e0.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366775/crosswild/blog/migrated/094764f1ca25e99212430fac136998e0.jpg
+[2026-05-21T12:32:56.423Z]   ✓ https://www.thecrosswild.com/upload/blog/104a8e2d6843eb6f50d805ec57fa9c4b.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366774/crosswild/blog/migrated/104a8e2d6843eb6f50d805ec57fa9c4b.jpg
+[2026-05-21T12:32:59.425Z]   ✓ https://www.thecrosswild.com/upload/blog/19771bc31f2bc7c68c108b9a9e527b61.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366777/crosswild/blog/migrated/19771bc31f2bc7c68c108b9a9e527b61.jpg
+[2026-05-21T12:32:59.426Z]   ✓ https://www.thecrosswild.com/upload/blog/436c8379fce5dbd333401f9b53538746.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366778/crosswild/blog/migrated/436c8379fce5dbd333401f9b53538746.jpg
+[2026-05-21T12:32:59.426Z]   ✓ https://www.thecrosswild.com/upload/blog/48db576b1c36fa506514847f3c945c4b.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366777/crosswild/blog/migrated/48db576b1c36fa506514847f3c945c4b.jpg
+[2026-05-21T12:32:59.426Z]   ✓ https://www.thecrosswild.com/upload/blog/762a6431748302930cf171ebeeef6597.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366778/crosswild/blog/migrated/762a6431748302930cf171ebeeef6597.jpg
+[2026-05-21T12:32:59.426Z]   ✓ https://www.thecrosswild.com/upload/blog/7a53ca06075c76b28337328374959da2.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366777/crosswild/blog/migrated/7a53ca06075c76b28337328374959da2.jpg
+[2026-05-21T12:33:07.292Z]   ✓ https://www.thecrosswild.com/upload/blog/9e4d94f7f02ffd385ce5d9dfa763e0c4.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366781/crosswild/blog/migrated/9e4d94f7f02ffd385ce5d9dfa763e0c4.jpg
+[2026-05-21T12:33:07.293Z]   ✓ https://www.thecrosswild.com/upload/blog/b4515bbd5ff1174638831547372a5744.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366780/crosswild/blog/migrated/b4515bbd5ff1174638831547372a5744.jpg
+[2026-05-21T12:33:07.293Z]   ✓ https://www.thecrosswild.com/upload/blog/c439b536655152d04d9d02834bf07420.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366782/crosswild/blog/migrated/c439b536655152d04d9d02834bf07420.jpg
+[2026-05-21T12:33:07.293Z]   ✓ https://www.thecrosswild.com/upload/blog/c4821cdd7d9a32503aed740b88765cc7.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366782/crosswild/blog/migrated/c4821cdd7d9a32503aed740b88765cc7.jpg
+[2026-05-21T12:33:07.293Z]   ✓ https://www.thecrosswild.com/upload/blog/d1d8c0ea1cf5068e9b118b00a5c17348.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366780/crosswild/blog/migrated/d1d8c0ea1cf5068e9b118b00a5c17348.jpg
+[2026-05-21T12:33:10.541Z]   ✓ https://www.thecrosswild.com/upload/blog/d95b1f7d07e1631650dc3651fb441324.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366788/crosswild/blog/migrated/d95b1f7d07e1631650dc3651fb441324.jpg
+[2026-05-21T12:33:10.541Z]   ✓ https://www.thecrosswild.com/upload/blog/ee26944f5628452efdacc836af3806f4.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366789/crosswild/blog/migrated/ee26944f5628452efdacc836af3806f4.jpg
+[2026-05-21T12:33:10.542Z]   ✓ https://www.thecrosswild.com/upload/blog/f5777d9b8b0f29bc9bb4717b2a448878.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366789/crosswild/blog/migrated/f5777d9b8b0f29bc9bb4717b2a448878.jpg
+[2026-05-21T12:33:10.542Z]   ✓ https://www.thecrosswild.com/upload/category/0c977d4571c4f822f96a1cc74bc91517.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366789/crosswild/category/migrated/0c977d4571c4f822f96a1cc74bc91517.jpg
+[2026-05-21T12:33:10.543Z]   ✓ https://www.thecrosswild.com/upload/category/18f1046130e78256ffcfed19179e0961.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366789/crosswild/category/migrated/18f1046130e78256ffcfed19179e0961.jpg
+[2026-05-21T12:33:13.819Z]   ✓ https://www.thecrosswild.com/upload/category/1cf6d53e65f3078d8a0cfba336955713.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366792/crosswild/category/migrated/1cf6d53e65f3078d8a0cfba336955713.jpg
+[2026-05-21T12:33:13.820Z]   ✓ https://www.thecrosswild.com/upload/category/48929651dd915ebe39e4f608bf8d674a.png
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366792/crosswild/category/migrated/48929651dd915ebe39e4f608bf8d674a.jpg
+[2026-05-21T12:33:13.820Z]   ✓ https://www.thecrosswild.com/upload/category/6475bbd0fc62eef7a6bb1b793933e830.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366792/crosswild/category/migrated/6475bbd0fc62eef7a6bb1b793933e830.jpg
+[2026-05-21T12:33:13.820Z]   ✓ https://www.thecrosswild.com/upload/category/8b29d382d7a8727aaa07a5c7755ec46b.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366791/crosswild/category/migrated/8b29d382d7a8727aaa07a5c7755ec46b.jpg
+[2026-05-21T12:33:13.820Z]   ✓ https://www.thecrosswild.com/upload/category/a1770d345abcda021af21af6ba5638e2.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366792/crosswild/category/migrated/a1770d345abcda021af21af6ba5638e2.jpg
+[2026-05-21T12:33:16.888Z]   ✓ https://www.thecrosswild.com/upload/category/a1829511fa2ebde94dbdd9c7699e550c.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366795/crosswild/category/migrated/a1829511fa2ebde94dbdd9c7699e550c.jpg
+[2026-05-21T12:33:16.889Z]   ✓ https://www.thecrosswild.com/upload/category/b1510016f57c92271cac5515176a700e.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366795/crosswild/category/migrated/b1510016f57c92271cac5515176a700e.jpg
+[2026-05-21T12:33:16.889Z]   ✓ https://www.thecrosswild.com/upload/category/ed3730d3c937c8abfc9cb55772e0de8a.jpg
+      → https://res.cloudinary.com/djvsjbzez/image/upload/v1779366795/crosswild/category/migrated/ed3730d3c937c8abfc9cb55772e0de8a.jpg
+[2026-05-21T12:33:16.891Z] 
+  Uploaded: 73    Skipped (already done): 0    Failed: 0
+[2026-05-21T12:33:17.344Z] 
+═══ PHASE 2: DB UPDATE — connected to thecrosswild ═══
+[2026-05-21T12:33:18.151Z]   servicecards                 7 doc(s) updated, 28 URL replacement(s)
+[2026-05-21T12:33:18.383Z]   globalseos                   1 doc(s) updated, 2 URL replacement(s)
+[2026-05-21T12:33:19.400Z]   blogs                        15 doc(s) updated, 30 URL replacement(s)
+[2026-05-21T12:33:19.543Z]   pagecontents                 1 doc(s) updated, 1 URL replacement(s)
+[2026-05-21T12:33:20.483Z]   pageseos                     20 doc(s) updated, 20 URL replacement(s)
+[2026-05-21T12:33:20.700Z] 
+═══ PHASE 3: SOURCE FILE REWRITE ═══
+[2026-05-21T12:33:20.719Z]   ✓ TheCrossWild/src/app/product/[slug]/page.tsx — 32 replacement(s)
+[2026-05-21T12:33:20.720Z]   ✓ TheCrossWild/src/app/product/cap-printing-manufacturer-in-jaipur/page.tsx — 6 replacement(s)
+[2026-05-21T12:33:20.721Z]   ✓ TheCrossWild/src/app/product/customize-promotional-t-shirt-manufacturer-in-Jaipur/page.tsx — 7 replacement(s)
+[2026-05-21T12:33:20.722Z]   ✓ TheCrossWild/src/app/product/face-mask-and-ppe-kit-manufacturer-jaipur/page.tsx — 4 replacement(s)
+[2026-05-21T12:33:20.723Z]   ✓ TheCrossWild/src/app/product/mug-printing-in-Jaipur/page.tsx — 7 replacement(s)
+[2026-05-21T12:33:20.724Z]   ✓ TheCrossWild/src/app/product/printing/page.tsx — 6 replacement(s)
+[2026-05-21T12:33:20.725Z]   ✓ TheCrossWild/src/app/product/sanitizer-and-infrared-thermometer-wholesaler-jaipur/page.tsx — 4 replacement(s)
+[2026-05-21T12:33:20.726Z]   ✓ TheCrossWild/src/app/product/school-laptop-bag-manufacturer-in-Jaipur/page.tsx — 11 replacement(s)
+[2026-05-21T12:33:20.726Z]   ✓ TheCrossWild/src/app/product/school-uniform/page.tsx — 8 replacement(s)
+[2026-05-21T12:33:20.727Z]   ✓ TheCrossWild/src/app/product/staff-uniform-manufacturer/page.tsx — 8 replacement(s)
+[2026-05-21T12:33:20.728Z]   ✓ TheCrossWild/src/app/product/sweatshirt-hoodie-manufacturer-in-Jaipur/page.tsx — 6 replacement(s)
+[2026-05-21T12:33:20.749Z]   ✓ TheCrossWildBackend/seeds/seed-cms.js — 28 replacement(s)
+[2026-05-21T12:33:20.750Z]   ✓ TheCrossWildBackend/seeds/seed-seo.js — 1 replacement(s)
+[2026-05-21T12:33:20.752Z] 
+  Files touched: 13    Total replacements: 128    Unmapped: 0
+[2026-05-21T12:33:20.752Z] 
+✅ Migration complete.

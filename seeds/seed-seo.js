@@ -16,7 +16,7 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-const OG_IMAGE = 'https://www.thecrosswild.com/assets/front/images/logo.jpg';
+const OG_IMAGE = 'https://res.cloudinary.com/djvsjbzez/image/upload/v1779366749/crosswild/seo/migrated/logo.jpg';
 
 const pages = [
   // ── Static pages ─────────────────────────────────────────────────────────
