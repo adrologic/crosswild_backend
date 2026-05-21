@@ -1,0 +1,70 @@
+const GalleryItem = require('../models/GalleryItem');
+const { uploadToImgBB } = require('../utils/imgbbUpload');
+
+const FOLDER = 'general';
+
+async function processImage(body) {
+  if (body.imageData) {
+    const result = await uploadToImgBB(body.imageData, 'base64', FOLDER);
+    body.image = result.url;
+    body.imageTrackingCode = result.trackingCode;
+    body.imagePublicId = result.publicId;
+    delete body.imageData;
+  }
+}
+
+exports.getAll = async (req, res) => {
+  try {
+    const { active, category } = req.query;
+    const query = {};
+    if (active === 'true') query.isActive = true;
+    if (category) query.category = category;
+    const items = await GalleryItem.find(query).sort({ order: 1, createdAt: -1 }).lean();
+    res.json({ success: true, items });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const item = await GalleryItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    res.json({ success: true, item });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.create = async (req, res) => {
+  try {
+    const body = { ...req.body };
+    await processImage(body);
+    const item = await GalleryItem.create(body);
+    res.status(201).json({ success: true, item });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const body = { ...req.body };
+    await processImage(body);
+    const item = await GalleryItem.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
+    if (!item) return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    res.json({ success: true, item });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.remove = async (req, res) => {
+  try {
+    const item = await GalleryItem.findByIdAndDelete(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

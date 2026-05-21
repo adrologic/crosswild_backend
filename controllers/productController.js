@@ -1,6 +1,33 @@
 const Product = require('../models/Product');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
 
+// Walk subImages[] and upload any { imageData } base64 entries.
+// Accepts entries shaped like { url, trackingCode, publicId } OR { imageData }.
+async function processSubImages(subImages, category) {
+  if (!Array.isArray(subImages)) return subImages;
+  const out = [];
+  for (const item of subImages) {
+    if (!item) continue;
+    if (typeof item === 'string') {
+      out.push({ url: item });
+    } else if (item.imageData) {
+      const result = await uploadToImgBB(item.imageData, 'base64', category || 'general');
+      out.push({
+        url: result.url,
+        trackingCode: result.trackingCode,
+        publicId: result.publicId,
+      });
+    } else if (item.url) {
+      out.push({
+        url: item.url,
+        trackingCode: item.trackingCode || '',
+        publicId: item.publicId || '',
+      });
+    }
+  }
+  return out;
+}
+
 // @desc    Get all products
 // @route   GET /api/products
 // @access  Public
@@ -119,6 +146,18 @@ exports.createProduct = async (req, res) => {
       }
     }
 
+    // Upload subImages base64 entries to Cloudinary
+    if (Array.isArray(productData.subImages)) {
+      try {
+        productData.subImages = await processSubImages(
+          productData.subImages,
+          productData.category || 'general'
+        );
+      } catch (error) {
+        return res.status(400).json({ success: false, message: `Sub-image upload failed: ${error.message}` });
+      }
+    }
+
     const product = await Product.create(productData);
 
     res.status(201).json({
@@ -160,6 +199,18 @@ exports.updateProduct = async (req, res) => {
         delete updateData.imageData;
       } catch (error) {
         return res.status(400).json({ success: false, message: `Image upload failed: ${error.message}` });
+      }
+    }
+
+    // Upload subImages base64 entries to Cloudinary
+    if (Array.isArray(updateData.subImages)) {
+      try {
+        updateData.subImages = await processSubImages(
+          updateData.subImages,
+          updateData.category || product.category || 'general'
+        );
+      } catch (error) {
+        return res.status(400).json({ success: false, message: `Sub-image upload failed: ${error.message}` });
       }
     }
 

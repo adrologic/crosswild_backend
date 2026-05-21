@@ -57,6 +57,28 @@ app.use('/api/seo', require('./routes/seo'));
 app.use('/api/locations', require('./routes/locations'));
 app.use('/api/content', require('./routes/pageContent'));
 
+// CMS — site-wide & marketing content
+app.use('/api/site-settings', require('./routes/siteSettings'));
+app.use('/api/testimonials', require('./routes/testimonials'));
+app.use('/api/brands', require('./routes/brands'));
+app.use('/api/deals', require('./routes/deals'));
+app.use('/api/menus', require('./routes/menus'));
+app.use('/api/policy-pages', require('./routes/policyPages'));
+app.use('/api/gallery', require('./routes/gallery'));
+app.use('/api/service-cards', require('./routes/serviceCards'));
+app.use('/api/why-choose-reasons', require('./routes/whyChooseReasons'));
+app.use('/api/home-capabilities', require('./routes/homeCapabilities'));
+app.use('/api/home-product-highlights', require('./routes/homeProductHighlights'));
+app.use('/api/home-why-choose', require('./routes/homeWhyChoose'));
+app.use('/api/process-steps', require('./routes/processSteps'));
+app.use('/api/category-home-cards', require('./routes/categoryHomeCards'));
+app.use('/api/size-charts', require('./routes/sizeCharts'));
+
+// Public submissions
+app.use('/api/subscribers', require('./routes/subscribers'));
+app.use('/api/contact-submissions', require('./routes/contactSubmissions'));
+app.use('/api/quote-submissions', require('./routes/quoteSubmissions'));
+
 // Health check route
 app.get('/api/health', (req, res) => {
   res.json({
