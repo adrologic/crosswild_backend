@@ -1,0 +1,35 @@
+# Keep the Render free-tier backend warm.
+#
+# Render free instances sleep after ~15 min of inactivity and take 30–60 s to
+# cold-start. The frontend's data fetchers time out and silently fall back to
+# empty data when that happens, which is the "half data on the footer" bug.
+#
+# This workflow hits a public endpoint every 10 minutes so the backend never
+# goes idle. ~144 runs/day × ~15 s each ≈ 36 min/day of CI time, well under
+# GitHub Actions' free-tier 2000 min/month.
+
+name: keep-warm
+
+on:
+  schedule:
+    # GitHub Actions cron uses UTC. Every 10 minutes, all hours.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping backend
+        run: |
+          set -e
+          URL="https://crosswild-backend-p5l3.onrender.com/api/site-settings"
+          # --max-time 90s gives ample headroom for a cold start (~30–60s).
+          # --retry 2 handles a transient network blip without falling back.
+          curl --silent --show-error --fail \
+               --max-time 90 \
+               --retry 2 --retry-delay 5 \
+               -o /dev/null \
+               -w "HTTP %{http_code} in %{time_total}s\n" \
+               "$URL"
