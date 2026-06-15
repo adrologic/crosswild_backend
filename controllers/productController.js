@@ -286,3 +286,23 @@ exports.getProductStats = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Lightweight signature of the public product set, used by the
+//          frontend to decide whether its cached list is still up to date.
+//          Changes whenever a product is added, edited, removed, or toggled
+//          active/inactive (count + most-recent updatedAt both contribute).
+// @route   GET /api/products/version
+// @access  Public
+exports.getProductsVersion = async (req, res) => {
+  try {
+    const count = await Product.countDocuments({ isActive: true });
+    const latest = await Product.findOne({ isActive: true })
+      .sort({ updatedAt: -1 })
+      .select('updatedAt')
+      .lean();
+    const lastModified = latest?.updatedAt ? new Date(latest.updatedAt).getTime() : 0;
+    res.json({ success: true, count, lastModified, version: `${count}:${lastModified}` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

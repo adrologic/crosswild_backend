@@ -8,11 +8,13 @@ const {
   updateProduct,
   deleteProduct,
   getProductStats,
+  getProductsVersion,
 } = require('../controllers/productController');
 
 // Public routes
 router.get('/', getAllProducts);
 router.get('/stats', getProductStats);
+router.get('/version', getProductsVersion); // must precede '/:id'
 router.get('/:id', getProduct);
 
 // Admin routes
