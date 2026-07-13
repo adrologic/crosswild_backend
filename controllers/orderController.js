@@ -1,11 +1,13 @@
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
 // @desc    Get all orders
 // @route   GET /api/orders
 // @access  Private/Admin
 exports.getAllOrders = async (req, res) => {
   try {
-    const { status, search, page = 1, limit: rawLimit = 50 } = req.query;
+    const { status, search, page: rawPage = 1, limit: rawLimit = 50 } = req.query;
+    const page = Math.max(1, parseInt(rawPage) || 1);
     const limit = Math.min(Math.max(1, Number(rawLimit) || 50), 100);
 
     const query = {};
@@ -63,9 +65,63 @@ exports.getOrder = async (req, res) => {
 // @access  Public
 exports.createOrder = async (req, res) => {
   try {
-    const orderData = req.body;
+    const body = req.body || {};
 
-    const order = await Order.create(orderData);
+    // Whitelist item fields, coerce quantity, and use DB prices where possible
+    const items = [];
+    for (const raw of Array.isArray(body.items) ? body.items : []) {
+      if (!raw) continue;
+      const quantity = Math.max(1, Math.floor(Number(raw.quantity)) || 1);
+      let price = Math.max(0, Number(raw.price) || 0);
+      if (raw.productId && String(raw.productId).match(/^[0-9a-fA-F]{24}$/)) {
+        const product = await Product.findById(raw.productId).select('price').lean();
+        // Only trust the DB price when one is actually set — this B2B catalog
+        // defaults price to 0, which would zero out every order total.
+        if (product && typeof product.price === 'number' && product.price > 0) price = product.price;
+      }
+      items.push({
+        productId: raw.productId,
+        name: raw.name,
+        price,
+        quantity,
+        size: raw.size,
+        color: raw.color,
+        image: raw.image,
+      });
+    }
+
+    // Recompute total server-side — never trust the client total
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const orderData = {
+      customerName: body.customerName,
+      customerEmail: body.customerEmail,
+      customerPhone: body.customerPhone,
+      shippingAddress: body.shippingAddress ? {
+        address: body.shippingAddress.address,
+        city: body.shippingAddress.city,
+        state: body.shippingAddress.state,
+        pincode: body.shippingAddress.pincode,
+      } : undefined,
+      items,
+      total,
+      status: 'pending',
+      paymentMethod: body.paymentMethod,
+      notes: body.notes,
+    };
+
+    // Generate orderNumber server-side; retry on duplicate-key collisions
+    let order;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      orderData.orderNumber = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      try {
+        order = await Order.create(orderData);
+        break;
+      } catch (err) {
+        if (err.code === 11000 && attempt < 3) continue;
+        throw err;
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -91,7 +147,7 @@ exports.updateOrderStatus = async (req, res) => {
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!order) {
@@ -142,7 +198,7 @@ exports.getOrderStats = async (req, res) => {
     const cancelled = await Order.countDocuments({ status: 'cancelled' });
 
     const totalRevenue = await Order.aggregate([
-      { $match: { status: { $in: ['completed', 'processing'] } } },
+      { $match: { status: 'completed' } },
       { $group: { _id: null, totalRevenue: { $sum: '$total' } } },
     ]);
 

@@ -1097,6 +1097,10 @@ const blogs = [
 ];
 
 async function seed() {
+  if (process.env.SEED_ALLOW_WIPE !== 'true') {
+    console.error('⛔ Refusing to run destructive seed; set SEED_ALLOW_WIPE=true to allow.');
+    process.exit(1);
+  }
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');

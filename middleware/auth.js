@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'crosswild-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware to verify JWT token and check admin role
 const requireAdmin = (req, res, next) => {
@@ -35,4 +35,18 @@ const requireAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { requireAdmin };
+// Non-throwing check for PUBLIC routes that behave slightly differently for a
+// logged-in admin (e.g. also returning inactive/unpublished rows). Returns true
+// only for a valid admin Bearer token; anything else is just "not admin".
+const isAdminRequest = (req) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    return decoded.role === 'admin';
+  } catch {
+    return false;
+  }
+};
+
+module.exports = { requireAdmin, isAdminRequest };

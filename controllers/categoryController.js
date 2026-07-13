@@ -1,4 +1,5 @@
 const Category = require('../models/Category');
+const Product = require('../models/Product');
 
 // @desc    Get all categories (flat list, with optional filters)
 // @route   GET /api/categories
@@ -154,7 +155,7 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// @desc    Delete category (and optionally its subcategories)
+// @desc    Delete category (blocked while subcategories or products still reference it)
 // @route   DELETE /api/categories/:id
 // @access  Private/Admin
 exports.deleteCategory = async (req, res) => {
@@ -168,13 +169,29 @@ exports.deleteCategory = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
 
-    // Also delete subcategories
-    const deletedSubs = await Category.deleteMany({ parentCategory: category._id });
+    // Products reference categories by slug (Category.id / seoUrl) in both the
+    // legacy `category` string and the `productCategories` array
+    const refValues = [...new Set([category.id, category.seoUrl].filter(Boolean))];
+    const productCount = await Product.countDocuments({
+      $or: [
+        { category: { $in: refValues } },
+        { 'productCategories.category': { $in: refValues } },
+      ],
+    });
+    const subCount = await Category.countDocuments({ parentCategory: category._id });
+
+    if (productCount > 0 || subCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete: ${productCount} products / ${subCount} subcategories still reference this category — reassign them first.`,
+      });
+    }
+
     await category.deleteOne();
 
     res.json({
       success: true,
-      message: `Category deleted successfully${deletedSubs.deletedCount > 0 ? ` (${deletedSubs.deletedCount} subcategories also removed)` : ''}`,
+      message: 'Category deleted successfully',
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

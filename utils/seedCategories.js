@@ -15,6 +15,10 @@ const categories = [
 ];
 
 const seedCategories = async () => {
+  if (process.env.SEED_ALLOW_WIPE !== 'true') {
+    console.error('⛔ Refusing to run destructive seed; set SEED_ALLOW_WIPE=true to allow.');
+    process.exit(1);
+  }
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
@@ -23,8 +27,16 @@ const seedCategories = async () => {
     await Category.deleteMany({});
     console.log('🗑️  Cleared existing categories');
 
-    // Insert new categories
-    await Category.insertMany(categories);
+    // Insert new categories (insertMany bypasses the pre-save hook,
+    // so generate seoUrl here the same way the model hook does)
+    const docs = categories.map(cat => ({
+      ...cat,
+      seoUrl: cat.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, ''),
+    }));
+    await Category.insertMany(docs);
     console.log(`✅ Seeded ${categories.length} categories`);
 
     console.log('\n📋 Categories:');

@@ -1,5 +1,7 @@
 const Product = require('../models/Product');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
+const { validateBase64Image } = require('../utils/validateBase64Image');
+const { isAdminRequest } = require('../middleware/auth');
 
 // Walk subImages[] and upload any { imageData } base64 entries.
 // Accepts entries shaped like { url, trackingCode, publicId } OR { imageData }.
@@ -11,6 +13,10 @@ async function processSubImages(subImages, category) {
     if (typeof item === 'string') {
       out.push({ url: item });
     } else if (item.imageData) {
+      const validationError = validateBase64Image(item.imageData);
+      if (validationError) {
+        throw new Error(validationError);
+      }
       const result = await uploadToImgBB(item.imageData, 'base64', category || 'general');
       out.push({
         url: result.url,
@@ -42,13 +48,18 @@ exports.getAllProducts = async (req, res) => {
       trending,
       mostPopular,
       search,
-      page = 1,
+      page: rawPage = 1,
       limit: rawLimit = 50
     } = req.query;
 
+    const page = Math.max(1, parseInt(rawPage) || 1);
     const limit = Math.min(Math.max(1, Number(rawLimit) || 50), 100);
 
-    const query = { isActive: true };
+    // Public listings only show active products. A logged-in admin may pass
+    // ?all=true to also see inactive ones (otherwise a deactivated product
+    // becomes invisible in the admin panel and can never be re-activated).
+    const query = {};
+    if (!(req.query.all === 'true' && isAdminRequest(req))) query.isActive = true;
 
     if (category && category !== 'all') {
       // Search in both legacy `category` field and new `productCategories` array
@@ -134,6 +145,10 @@ exports.createProduct = async (req, res) => {
 
     // Upload image to Cloudinary if base64 provided
     if (productData.imageData) {
+      const validationError = validateBase64Image(productData.imageData);
+      if (validationError) {
+        return res.status(400).json({ success: false, message: validationError });
+      }
       try {
         const category = productData.category || 'general';
         const result = await uploadToImgBB(productData.imageData, 'base64', category);
@@ -190,6 +205,10 @@ exports.updateProduct = async (req, res) => {
 
     // Upload new image to Cloudinary if base64 provided
     if (updateData.imageData) {
+      const validationError = validateBase64Image(updateData.imageData);
+      if (validationError) {
+        return res.status(400).json({ success: false, message: validationError });
+      }
       try {
         const category = updateData.category || product.category || 'general';
         const result = await uploadToImgBB(updateData.imageData, 'base64', category);
@@ -212,6 +231,12 @@ exports.updateProduct = async (req, res) => {
       } catch (error) {
         return res.status(400).json({ success: false, message: `Sub-image upload failed: ${error.message}` });
       }
+    }
+
+    // Keep legacy `category` in sync with productCategories
+    // (mirrors the Product pre-save hook, which findByIdAndUpdate bypasses)
+    if (Array.isArray(updateData.productCategories) && updateData.productCategories.length > 0 && !updateData.category) {
+      updateData.category = updateData.productCategories[0].category;
     }
 
     product = await Product.findByIdAndUpdate(

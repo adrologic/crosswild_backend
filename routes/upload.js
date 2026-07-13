@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const { requireAdmin } = require('../middleware/auth');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
+const { validateBase64Image } = require('../utils/validateBase64Image');
 
 // Configure multer for memory storage
 const upload = multer({
@@ -59,6 +60,11 @@ router.post('/base64', requireAdmin, async (req, res) => {
 
     if (!imageData) {
       return res.status(400).json({ success: false, message: 'No image data provided' });
+    }
+
+    const validationError = validateBase64Image(imageData);
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
     }
 
     const result = await uploadToImgBB(imageData, 'base64', folder || category || 'general');

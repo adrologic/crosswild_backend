@@ -1,15 +1,21 @@
 const Blog = require('../models/Blog');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
+const { isAdminRequest } = require('../middleware/auth');
 
 // @desc    Get all blogs
 // @route   GET /api/blogs
 // @access  Public
 exports.getAllBlogs = async (req, res) => {
   try {
-    const { search, tag, showOnHome, page = 1, limit: rawLimit = 20 } = req.query;
+    const { search, tag, showOnHome, page: rawPage = 1, limit: rawLimit = 20 } = req.query;
+    const page = Math.max(1, parseInt(rawPage) || 1);
     const limit = Math.min(Math.max(1, Number(rawLimit) || 20), 100);
 
-    const query = { isPublished: true };
+    // Public listings only show published blogs. A logged-in admin may pass
+    // ?all=true to also see unpublished ones (otherwise an unpublished blog is
+    // invisible in the admin panel and can never be managed from the UI).
+    const query = {};
+    if (!(req.query.all === 'true' && isAdminRequest(req))) query.isPublished = true;
 
     if (search) query.$text = { $search: search };
     if (tag) query.tags = tag;

@@ -362,6 +362,20 @@ exports.getContentItemsWithSEO = async (req, res) => {
   }
 };
 
+// Merge-update helper: the SEO modal only sends a subset of the seo fields
+// (title/description/keywords/...). Setting `{ seo: req.body }` would replace
+// the whole subdocument and silently erase fields the modal doesn't manage —
+// notably seo.otherMetaTags and seo.structuredData entered in the
+// product/blog/category editors. Dotted paths update only what was sent.
+const buildSeoSet = (body) => {
+  const set = {};
+  for (const [key, value] of Object.entries(body || {})) {
+    if (key === '_id' || key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    set[`seo.${key}`] = value;
+  }
+  return set;
+};
+
 // @desc    Update SEO for a single product
 // @route   PUT /api/seo/product/:id
 // @access  Private/Admin
@@ -370,7 +384,7 @@ exports.updateProductSEO = async (req, res) => {
     const Product = require('../models/Product');
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { $set: { seo: req.body } },
+      { $set: buildSeoSet(req.body) },
       { new: true, runValidators: true }
     ).select('name title slug seo');
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
@@ -388,7 +402,7 @@ exports.updateBlogSEO = async (req, res) => {
     const Blog = require('../models/Blog');
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,
-      { $set: { seo: req.body } },
+      { $set: buildSeoSet(req.body) },
       { new: true, runValidators: true }
     ).select('title slug seo');
     if (!blog) return res.status(404).json({ success: false, message: 'Blog not found' });
@@ -406,7 +420,7 @@ exports.updateCategorySEO = async (req, res) => {
     const Category = require('../models/Category');
     const category = await Category.findByIdAndUpdate(
       req.params.id,
-      { $set: { seo: req.body } },
+      { $set: buildSeoSet(req.body) },
       { new: true, runValidators: true }
     ).select('name id seo');
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });

@@ -1,4 +1,5 @@
 const PolicyPage = require('../models/PolicyPage');
+const { isAdminRequest } = require('../middleware/auth');
 
 exports.getAll = async (req, res) => {
   try {
@@ -11,7 +12,11 @@ exports.getAll = async (req, res) => {
 
 exports.getBySlug = async (req, res) => {
   try {
-    const page = await PolicyPage.findOne({ slug: req.params.slug, isActive: true }).lean();
+    // Admins also see inactive pages — otherwise the admin editor loads an
+    // empty form for an inactive page and saving it would wipe the content.
+    const filter = { slug: req.params.slug };
+    if (!isAdminRequest(req)) filter.isActive = true;
+    const page = await PolicyPage.findOne(filter).lean();
     if (!page) return res.status(404).json({ success: false, message: 'Policy page not found' });
     res.json({ success: true, page });
   } catch (error) {

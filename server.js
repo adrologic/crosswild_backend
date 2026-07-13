@@ -1,4 +1,11 @@
 require('dotenv').config({ override: false });
+
+// Fail fast if the JWT secret is missing — auth cannot work without it
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -24,8 +31,8 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. curl, Postman)
     if (!origin) return callback(null, true);
-    // Allow any localhost port in development
-    if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+    // Allow any localhost port in development only
+    if (process.env.NODE_ENV !== 'production' && /^http:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
     // Allow specific production domains
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -153,9 +160,8 @@ const gracefulShutdown = (signal) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections — log but keep the server running
 process.on('unhandledRejection', (err) => {
-  console.log(`❌ Error: ${err.message}`);
-  console.log('Shutting down server due to unhandled promise rejection');
-  server.close(() => process.exit(1));
+  console.error(`❌ Unhandled promise rejection: ${err.message}`);
+  console.error(err.stack);
 });

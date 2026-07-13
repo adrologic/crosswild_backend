@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAdmin } = require('../middleware/auth');
+const { publicSubmitLimiter } = require('../middleware/rateLimit');
 const {
   getAllOrders,
   getOrder,
@@ -11,7 +12,7 @@ const {
 } = require('../controllers/orderController');
 
 // Public routes
-router.post('/', createOrder);
+router.post('/', publicSubmitLimiter, createOrder);
 
 // Admin routes
 router.get('/', requireAdmin, getAllOrders);

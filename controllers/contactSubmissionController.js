@@ -28,10 +28,14 @@ exports.getAll = async (req, res) => {
 
 exports.updateStatus = async (req, res) => {
   try {
+    const allowedStatuses = ContactSubmission.schema.path('status').enumValues;
+    if (!allowedStatuses.includes(req.body.status)) {
+      return res.status(400).json({ success: false, message: `Invalid status. Allowed: ${allowedStatuses.join(', ')}` });
+    }
     const submission = await ContactSubmission.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
     res.json({ success: true, submission });

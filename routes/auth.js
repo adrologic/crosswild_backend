@@ -1,10 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'crosswild-secret-key-2026';
-const ADMIN_EMAIL = 'admin@thecrosswild.com';
-const ADMIN_PASSWORD = 'admin123';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Constant-time string comparison (length check first, then timing-safe compare)
+const safeEqual = (a, b) => {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+};
 
 // @desc    Admin login
 // @route   POST /api/auth/login
@@ -19,7 +26,19 @@ router.post('/login', (req, res) => {
     });
   }
 
-  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    console.error('Login failed: ADMIN_EMAIL and/or ADMIN_PASSWORD environment variables are not set');
+    return res.status(500).json({
+      success: false,
+      message: 'Server configuration error',
+    });
+  }
+
+  const emailOk = safeEqual(email, ADMIN_EMAIL);
+  const passwordOk = safeEqual(password, ADMIN_PASSWORD);
+  if (!emailOk || !passwordOk) {
     return res.status(401).json({
       success: false,
       message: 'Invalid credentials',
