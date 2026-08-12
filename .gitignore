@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json is committed on purpose — the Docker build runs `npm ci`,
+# which refuses to install without it.
 
 # Environment variables
 .env

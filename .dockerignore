@@ -1,0 +1,23 @@
+# Keep the build context small and keep secrets out of the image.
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+.git
+.github
+.vscode
+.idea
+
+# Real secrets never enter the image — Coolify injects env vars at runtime.
+.env
+.env.local
+.env.production
+
+.DS_Store
+Thumbs.db
+
+dist
+build
+uploads
+logs
+*.log

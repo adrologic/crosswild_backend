@@ -11,10 +11,17 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
+const mongoose = require('mongoose');
 const connectDB = require('./config/database');
 
 // Initialize express app
 const app = express();
+
+// In production the app sits behind Coolify's Traefik proxy. Trust exactly one
+// hop so req.ip and express-rate-limit see the real client IP — without this
+// every request looks like it came from the proxy, and the per-IP limiter on the
+// public submit endpoints would throttle all visitors as if they were one.
+app.set('trust proxy', 1);
 
 // Connect to MongoDB
 connectDB();
@@ -25,6 +32,12 @@ const ALLOWED_ORIGINS = [
   'https://thecrosswild.com',
   'https://www.thecrosswild.com',
   'https://the-cross-wild-admin.vercel.app',
+  // Extra origins for a new host or domain, comma-separated in CORS_ORIGIN.
+  // Additive only — the three above are always allowed.
+  ...(process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
 ];
 
 app.use(cors({
@@ -47,7 +60,9 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 app.use(compression());
-app.use(morgan('dev'));
+// 'combined' in production so the Coolify logs carry status, size, referrer and
+// the real client IP (see trust proxy above); 'dev' stays terse locally.
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
@@ -86,11 +101,18 @@ app.use('/api/subscribers', require('./routes/subscribers'));
 app.use('/api/contact-submissions', require('./routes/contactSubmissions'));
 app.use('/api/quote-submissions', require('./routes/quoteSubmissions'));
 
-// Health check route
+// Health check route — Coolify polls this to decide whether a deploy succeeded.
+// It always answers 200 as long as the process is up: a transient Mongo blip
+// should show in `database` for diagnosis, not kill the container and start a
+// restart loop that also takes down the routes that don't need the DB.
+const MONGO_STATES = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
+    database: MONGO_STATES[mongoose.connection.readyState] || 'unknown',
+    uptime: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),
   });
 });
@@ -136,7 +158,9 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+// Bind all interfaces explicitly — inside a container, Traefik reaches the app
+// on the container's own IP, not on loopback.
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🚀 Server is running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV}`);
   console.log(`🌐 API URL: http://localhost:${PORT}`);
