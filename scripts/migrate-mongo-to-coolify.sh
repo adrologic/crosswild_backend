@@ -113,12 +113,35 @@ if command -v mongosh >/dev/null; then
   mongosh --host "$CONNECT_HOST" --port "$CONNECT_PORT" \
     -u "$TARGET_USER" -p "$TARGET_PASS" --authenticationDatabase admin \
     "$TARGET_DB" --quiet --eval "$COUNT_JS" > "$DUMP_DIR/counts-target.txt"
-  if diff -u "$DUMP_DIR/counts-source.txt" "$DUMP_DIR/counts-target.txt"; then
-    echo "    ✅ identical collections and document counts"
+  # Compare in one direction only: every source collection must exist on the
+  # target with the same count. Extra collections on the target are reported but
+  # are not a failure — Coolify's MongoDB ships an empty `init_collection`, and a
+  # plain diff would flag that as data loss when nothing is missing at all.
+  MISMATCH=0
+  while IFS=$'\t' read -r col src_n; do
+    [ -n "$col" ] || continue
+    tgt_n="$(awk -F'\t' -v c="$col" '$1 == c { print $2 }' "$DUMP_DIR/counts-target.txt")"
+    if [ -z "$tgt_n" ]; then
+      echo "    ❌ MISSING on target: $col ($src_n documents)" >&2
+      MISMATCH=1
+    elif [ "$tgt_n" != "$src_n" ]; then
+      echo "    ❌ COUNT DIFFERS: $col — source=$src_n target=$tgt_n" >&2
+      MISMATCH=1
+    fi
+  done < "$DUMP_DIR/counts-source.txt"
+
+  EXTRA="$(awk -F'\t' 'NR==FNR { s[$1]; next } !($1 in s) { print "       - " $1 " (" $2 " documents)" }' \
+           "$DUMP_DIR/counts-source.txt" "$DUMP_DIR/counts-target.txt")"
+
+  if [ "$MISMATCH" -eq 0 ]; then
+    SRC_COLS="$(wc -l < "$DUMP_DIR/counts-source.txt" | tr -d ' ')"
+    SRC_DOCS="$(awk -F'\t' '{ t += $2 } END { print t }' "$DUMP_DIR/counts-source.txt")"
+    echo "    ✅ all $SRC_COLS collections present with matching counts ($SRC_DOCS documents)"
+    [ -n "$EXTRA" ] && { echo "    ℹ️  extra collections on the target (harmless):"; echo "$EXTRA"; }
   else
-    # Exit non-zero: a restore can report success and still have moved nothing,
-    # so the count comparison is the real pass/fail gate for this migration.
-    echo "    ❌ counts differ — the copy is NOT complete. Review the diff above." >&2
+    # A restore can report success and still have moved nothing, so this
+    # comparison is the real pass/fail gate for the migration.
+    echo "    ❌ the copy is NOT complete — see the lines above." >&2
     echo "       Dump retained at $DUMP_ROOT; fix the cause and re-run." >&2
     exit 1
   fi
