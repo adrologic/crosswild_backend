@@ -5,16 +5,23 @@
 #
 #   • Copy only. Nothing is ever dropped or deleted from Atlas.
 #   • The dump is kept on disk afterwards so you can re-run the restore.
-#   • The target is reached through an SSH tunnel to the Mongo container, so the
-#     database never has to be exposed on the public internet. (Coolify's
-#     "public port" toggle would publish 0.0.0.0:27017, which bypasses UFW —
-#     see the Docker/UFW warning in SERVER-RUNBOOK.md §2.)
 #
-# Usage:
-#   export SOURCE_URI='mongodb+srv://USER:PASS@thecrosswild.j8lzvdi.mongodb.net/thecrosswild'
-#   export TARGET_USER='...'          # Coolify Mongo username (from the DB resource)
-#   export TARGET_PASS='...'          # Coolify Mongo password
-#   ./scripts/migrate-mongo-to-coolify.sh
+# Two ways to reach the target — pick one:
+#
+#   A. TUNNEL (default, nothing exposed). Needs `ssh <SSH_HOST>` to work. Opens an
+#      SSH tunnel straight to the Mongo container.
+#        export SOURCE_URI='mongodb+srv://USER:PASS@thecrosswild.j8lzvdi.mongodb.net/thecrosswild'
+#        export TARGET_USER='root' TARGET_PASS='...'
+#        ./scripts/migrate-mongo-to-coolify.sh
+#
+#   B. DIRECT, via Coolify's "Make it publicly available" toggle. No SSH needed.
+#      Set TARGET_HOST and the script skips the tunnel entirely.
+#        export TARGET_HOST=217.216.59.240 TARGET_PORT=27417
+#        export TARGET_USER='root' TARGET_PASS='...'
+#        ./scripts/migrate-mongo-to-coolify.sh
+#      ⚠️ A published Docker port bypasses UFW (SERVER-RUNBOOK.md §2) — the
+#      database is on the open internet for as long as the toggle is on. Untick
+#      it in Coolify the moment this script finishes; the script reminds you.
 #
 # Optional:
 #   SOURCE_DB=thecrosswild   TARGET_DB=thecrosswild
@@ -42,14 +49,24 @@ command -v mongodump    >/dev/null || die "mongodump not found. brew install mon
 command -v mongorestore >/dev/null || die "mongorestore not found. brew install mongodb-database-tools"
 
 # ── 1. Dump from Atlas ────────────────────────────────────────────────────────
-echo "==> Dumping '$SOURCE_DB' from Atlas into $DUMP_DIR"
-mkdir -p "$DUMP_DIR"
-mongodump --uri="$SOURCE_URI" --db="$SOURCE_DB" --out="$DUMP_DIR"
+# The BSON lives in $DUMP_ROOT and the verification reports beside it, so
+# mongorestore only ever sees database directories.
+DUMP_ROOT="$DUMP_DIR/dump"
+echo "==> Dumping '$SOURCE_DB' from Atlas into $DUMP_ROOT"
+mkdir -p "$DUMP_ROOT"
+mongodump --uri="$SOURCE_URI" --db="$SOURCE_DB" --out="$DUMP_ROOT"
 
-[ -d "$DUMP_DIR/$SOURCE_DB" ] || die "Dump produced no '$SOURCE_DB' directory — check SOURCE_URI."
-echo "==> Dumped $(find "$DUMP_DIR/$SOURCE_DB" -name '*.bson' | wc -l | tr -d ' ') collections"
+[ -d "$DUMP_ROOT/$SOURCE_DB" ] || die "Dump produced no '$SOURCE_DB' directory — check SOURCE_URI."
+echo "==> Dumped $(find "$DUMP_ROOT/$SOURCE_DB" -name '*.bson' | wc -l | tr -d ' ') collections"
 
-# ── 2. Find the Mongo container on prod01 and tunnel to it ────────────────────
+# ── 2. Reach the target: direct if TARGET_HOST is set, else an SSH tunnel ─────
+if [ -n "${TARGET_HOST:-}" ]; then
+  TARGET_PORT="${TARGET_PORT:-27417}"
+  CONNECT_HOST="$TARGET_HOST"
+  CONNECT_PORT="$TARGET_PORT"
+  echo "==> Direct connection to $TARGET_HOST:$TARGET_PORT (Coolify public port)"
+  echo "    ⚠️  This port is open to the internet while the toggle is on."
+else
 echo "==> Locating the Coolify MongoDB container on $SSH_HOST"
 CONTAINER="$(ssh "$SSH_HOST" "docker ps --format '{{.Names}}\t{{.Image}}' | awk -F'\t' '\$2 ~ /mongo/ {print \$1}'" | head -1)"
 [ -n "$CONTAINER" ] || die "No running container with a mongo image found on $SSH_HOST. Deploy the database resource in Coolify first."
@@ -63,29 +80,47 @@ ssh -f -N -o ExitOnForwardFailure=yes -L "$LOCAL_PORT:$CONTAINER_IP:27017" "$SSH
 TUNNEL_PID="$(pgrep -f "ssh -f -N .* -L $LOCAL_PORT:$CONTAINER_IP:27017 $SSH_HOST" | head -1 || true)"
 cleanup() { [ -n "${TUNNEL_PID:-}" ] && kill "$TUNNEL_PID" 2>/dev/null || true; }
 trap cleanup EXIT
+  CONNECT_HOST="127.0.0.1"
+  CONNECT_PORT="$LOCAL_PORT"
+fi
 
 # ── 3. Restore into the Coolify MongoDB ───────────────────────────────────────
-# authSource=admin: Coolify's Mongo creates the user in the admin database.
-TARGET_URI="mongodb://$TARGET_USER:$TARGET_PASS@127.0.0.1:$LOCAL_PORT/$TARGET_DB?authSource=admin&directConnection=true"
+# Credentials go in as discrete flags, never inside a URI: Coolify generates
+# passwords containing @ / : % which would have to be percent-encoded in a
+# connection string, and a half-encoded password fails as "auth failed".
+# --authenticationDatabase=admin because Coolify creates the root user there.
+#
+# The connection must NOT name a database. Naming one puts mongorestore in
+# single-database mode, where the positional path is expected to hold .bson
+# files directly — it would walk straight past the thecrosswild/ subdirectory
+# and restore 0 documents while still exiting 0.
+TARGET_AUTH=(--host="$CONNECT_HOST" --port="$CONNECT_PORT"
+             -u "$TARGET_USER" -p "$TARGET_PASS" --authenticationDatabase=admin)
 
-echo "==> Restoring into '$TARGET_DB' on $SSH_HOST"
+echo "==> Restoring into '$TARGET_DB'"
 echo "    (no --drop: existing documents are preserved, matching _ids are skipped)"
 mongorestore \
-  --uri="$TARGET_URI" \
+  "${TARGET_AUTH[@]}" \
   --nsFrom="$SOURCE_DB.*" --nsTo="$TARGET_DB.*" \
   --numInsertionWorkersPerCollection=4 \
-  "$DUMP_DIR"
+  "$DUMP_ROOT"
 
 # ── 4. Verify: compare per-collection document counts ─────────────────────────
 if command -v mongosh >/dev/null; then
   echo "==> Verifying document counts (source -> target)"
   COUNT_JS='db.getCollectionNames().sort().forEach(c => print(c + "\t" + db[c].countDocuments()))'
-  mongosh "$SOURCE_URI"  --quiet --eval "$COUNT_JS" > "$DUMP_DIR/counts-source.txt"
-  mongosh "$TARGET_URI"  --quiet --eval "$COUNT_JS" > "$DUMP_DIR/counts-target.txt"
+  mongosh "$SOURCE_URI" --quiet --eval "$COUNT_JS" > "$DUMP_DIR/counts-source.txt"
+  mongosh --host "$CONNECT_HOST" --port "$CONNECT_PORT" \
+    -u "$TARGET_USER" -p "$TARGET_PASS" --authenticationDatabase admin \
+    "$TARGET_DB" --quiet --eval "$COUNT_JS" > "$DUMP_DIR/counts-target.txt"
   if diff -u "$DUMP_DIR/counts-source.txt" "$DUMP_DIR/counts-target.txt"; then
     echo "    ✅ identical collections and document counts"
   else
-    echo "    ⚠️  counts differ — review the diff above before cutting traffic over" >&2
+    # Exit non-zero: a restore can report success and still have moved nothing,
+    # so the count comparison is the real pass/fail gate for this migration.
+    echo "    ❌ counts differ — the copy is NOT complete. Review the diff above." >&2
+    echo "       Dump retained at $DUMP_ROOT; fix the cause and re-run." >&2
+    exit 1
   fi
 else
   echo "==> mongosh not installed; skipping count verification (brew install mongosh)"
@@ -94,3 +129,12 @@ fi
 echo
 echo "Done. Dump retained at: $DUMP_DIR"
 echo "Atlas is untouched — keep it running until the new API has been live and verified."
+
+if [ -n "${TARGET_HOST:-}" ]; then
+  echo
+  echo "┌──────────────────────────────────────────────────────────────────────┐"
+  echo "│  NOW GO UNTICK 'Make it publicly available' IN COOLIFY AND SAVE.     │"
+  echo "│  The database is reachable from the internet until you do.           │"
+  echo "│  The API does not need it — it talks over the internal Docker net.   │"
+  echo "└──────────────────────────────────────────────────────────────────────┘"
+fi
