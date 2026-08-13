@@ -1,5 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const crypto = require('crypto');
+const r2 = require('./r2Storage');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -7,6 +8,18 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Where new uploads go. Cloudinary stays the default so nothing changes until
+// the R2 variables are deliberately set. Existing images already moved to R2 by
+// scripts/migrate-cloudinary-to-r2.js keep working either way — the database
+// holds absolute URLs, and Cloudinary is never deleted from.
+const useR2 = () => process.env.STORAGE_DRIVER === 'r2';
+
+/** Strip a data URI down to raw bytes. Uploads arrive base64 from routes/upload.js. */
+const bufferFromImageData = (imageData) => {
+  const base64 = imageData.startsWith('data:') ? imageData.split(',')[1] : imageData;
+  return Buffer.from(base64, 'base64');
+};
 
 /**
  * Generate a unique tracking code
@@ -69,6 +82,16 @@ const getCategoryFolder = (category) => {
  */
 const uploadToImgBB = async (imageData, imageType = 'file', folder = 'general') => {
   try {
+    const resolvedFolder = getCategoryFolder(folder);
+    const trackingCode = generateTrackingCode(resolvedFolder);
+
+    if (useR2()) {
+      const key = r2.buildKey(resolvedFolder, trackingCode);
+      const { url } = await r2.putImage(bufferFromImageData(imageData), key);
+      // publicId carries the R2 key so deleteImage() can remove the object.
+      return { url, trackingCode, publicId: key };
+    }
+
     if (!process.env.CLOUDINARY_CLOUD_NAME) {
       throw new Error('Cloudinary credentials not configured');
     }
@@ -80,9 +103,6 @@ const uploadToImgBB = async (imageData, imageType = 'file', folder = 'general') 
         uploadData = `data:image/png;base64,${imageData}`;
       }
     }
-
-    const resolvedFolder = getCategoryFolder(folder);
-    const trackingCode = generateTrackingCode(resolvedFolder);
 
     const result = await cloudinary.uploader.upload(uploadData, {
       folder: resolvedFolder,
@@ -112,12 +132,20 @@ const uploadToImgBB = async (imageData, imageType = 'file', folder = 'general') 
  */
 const uploadFromUrl = async (imageUrl, folder = 'general') => {
   try {
+    const resolvedFolder = getCategoryFolder(folder);
+    const trackingCode = generateTrackingCode(resolvedFolder);
+
+    if (useR2()) {
+      const res = await fetch(imageUrl);
+      if (!res.ok) throw new Error(`Could not fetch ${imageUrl} — HTTP ${res.status}`);
+      const key = r2.buildKey(resolvedFolder, trackingCode);
+      const { url } = await r2.putImage(Buffer.from(await res.arrayBuffer()), key);
+      return { url, trackingCode, publicId: key };
+    }
+
     if (!process.env.CLOUDINARY_CLOUD_NAME) {
       throw new Error('Cloudinary credentials not configured');
     }
-
-    const resolvedFolder = getCategoryFolder(folder);
-    const trackingCode = generateTrackingCode(resolvedFolder);
 
     const result = await cloudinary.uploader.upload(imageUrl, {
       folder: resolvedFolder,
@@ -145,6 +173,13 @@ const uploadFromUrl = async (imageUrl, folder = 'general') => {
  */
 const deleteImage = async (identifier) => {
   try {
+    if (!identifier) return;
+
+    // Route by where the image actually lives, not by the current driver — after
+    // the R2 migration both kinds of reference exist in the database, and old
+    // Cloudinary URLs must still be deletable.
+    if (r2.isR2Reference(identifier)) return r2.removeImage(identifier);
+
     let publicId = identifier;
 
     // If it's a URL, extract the public_id
