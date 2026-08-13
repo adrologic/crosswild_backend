@@ -31,3 +31,13 @@ build/
 
 # Uploads (if storing locally)
 uploads/
+
+# Catalogue-rebuild working files (local state and data dumps, not code)
+backups/
+scripts/.live-fingerprints.json
+scripts/.upload-progress.json
+scripts/.switch-state.json
+scripts/.switch-state.json.reverted
+scripts/product-image-audit.json
+scripts/redirect-map.json
+scripts/new-catalogue-133.json

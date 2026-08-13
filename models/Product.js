@@ -1,4 +1,9 @@
 const mongoose = require('mongoose');
+const {
+  generateProductCode,
+  isValidProductCode,
+  PRODUCT_CODE_INDEX,
+} = require('../utils/productCode');
 
 const productSchema = new mongoose.Schema({
   name: {
@@ -11,11 +16,16 @@ const productSchema = new mongoose.Schema({
     trim: true,
     default: '',
   },
+  // Public product code ("CW1482"). Issued automatically on create, unique,
+  // and permanent once assigned — buyers quote it back over WhatsApp.
+  // The unique index is declared below (a plain `index: true` here would
+  // conflict with it: MongoDB refuses two indexes on the same key that differ
+  // only in their options).
   sku: {
     type: String,
     trim: true,
+    uppercase: true,
     default: '',
-    index: true,
   },
   slug: {
     type: String,
@@ -82,8 +92,23 @@ const productSchema = new mongoose.Schema({
   imagePublicId: {
     type: String,
   },
+  // Lighter versions of `image`, so a phone on a slow connection isn't asked to
+  // download a full-size product photo to fill a 200px grid card.
+  //   imageThumb — ~500px wide, used by cards, grids, menus and thumbnails.
+  //   imageBlur  — ~1KB base64, stored inline and rendered instantly while the
+  //                real photo loads. No second request, so it costs nothing.
+  imageThumb: {
+    type: String,
+    default: '',
+  },
+  imageBlur: {
+    type: String,
+    default: '',
+  },
   subImages: [{
     url: { type: String },
+    thumbUrl: { type: String },
+    blurData: { type: String },
     trackingCode: { type: String },
     publicId: { type: String },
   }],
@@ -177,6 +202,15 @@ const productSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+// Issue a product code to any document that doesn't have one, so every path
+// that creates a product (admin panel, seed scripts, imports) gets one. This
+// only picks the candidate — uniqueness is enforced by the index below, and
+// callers should go through utils/productCode.js `saveWithProductCode` /
+// `createProductWithCode` so a collision is retried instead of thrown.
+productSchema.pre('validate', function () {
+  if (!isValidProductCode(this.sku)) this.sku = generateProductCode();
+});
+
 // Auto-populate category from first productCategories entry
 productSchema.pre('save', function () {
   if (this.productCategories && this.productCategories.length > 0 && !this.category) {
@@ -201,6 +235,17 @@ productSchema.pre('save', async function () {
     this.slug = slug;
   }
 });
+
+// Product codes must be unique. Partial (rather than sparse) so that products
+// still carrying the legacy empty-string sku don't all collide on '' while the
+// backfill runs: `$gt: ''` indexes non-empty strings only.
+// NOTE: scripts/backfillProductCodes.js drops the old non-unique `sku_1` index
+// before creating this one — until it has run, MongoDB rejects this index with
+// IndexOptionsConflict.
+productSchema.index(
+  { sku: 1 },
+  { unique: true, name: PRODUCT_CODE_INDEX, partialFilterExpression: { sku: { $gt: '' } } }
+);
 
 // Index for better search performance
 productSchema.index({ name: 'text', description: 'text' });

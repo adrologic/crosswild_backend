@@ -2,6 +2,12 @@ const Product = require('../models/Product');
 const { uploadToImgBB } = require('../utils/imgbbUpload');
 const { validateBase64Image } = require('../utils/validateBase64Image');
 const { isAdminRequest } = require('../middleware/auth');
+const {
+  PRODUCT_CODE_REGEX,
+  isValidProductCode,
+  createProductWithCode,
+  ensureProductCode,
+} = require('../utils/productCode');
 
 // Walk subImages[] and upload any { imageData } base64 entries.
 // Accepts entries shaped like { url, trackingCode, publicId } OR { imageData }.
@@ -80,7 +86,17 @@ exports.getAllProducts = async (req, res) => {
     if (featured === 'true') query.featured = true;
     if (trending === 'true') query.trending = true;
     if (mostPopular === 'true') query.mostPopular = true;
-    if (search) query.$text = { $search: search };
+    // A buyer who reads "CW1482" off a product photo types it straight into the
+    // site search. Look that up by code instead of running it through the
+    // name/description text index, which would return nothing.
+    if (search) {
+      const term = String(search).trim();
+      if (PRODUCT_CODE_REGEX.test(term.toUpperCase())) {
+        query.sku = term.toUpperCase();
+      } else {
+        query.$text = { $search: term };
+      }
+    }
 
     const products = await Product.find(query)
       .populate('productType', 'name slug icon detailFields hasSizes hasColors customSizes')
@@ -143,6 +159,13 @@ exports.createProduct = async (req, res) => {
       delete productData.productType;
     }
 
+    // Never take a hand-typed code from the client — the field is read-only in
+    // the admin panel and the code is issued below. A well-formed code posted
+    // by an import is honoured (and still checked against the unique index).
+    if (!isValidProductCode(productData.sku)) {
+      delete productData.sku;
+    }
+
     // Upload image to Cloudinary if base64 provided
     if (productData.imageData) {
       const validationError = validateBase64Image(productData.imageData);
@@ -173,7 +196,8 @@ exports.createProduct = async (req, res) => {
       }
     }
 
-    const product = await Product.create(productData);
+    // Generate-then-insert with a retry loop; the unique index arbitrates.
+    const product = await createProductWithCode(Product, productData);
 
     res.status(201).json({
       success: true,
@@ -197,6 +221,10 @@ exports.updateProduct = async (req, res) => {
     }
 
     const updateData = req.body;
+
+    // Product codes are permanent once issued — a buyer may already have the
+    // old one written on a quote. An edit can never change or clear it.
+    delete updateData.sku;
 
     // Remove empty productType to avoid ObjectId cast error
     if (!updateData.productType) {
@@ -244,6 +272,13 @@ exports.updateProduct = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     );
+
+    // Safety net for products created before codes existed (or missed by the
+    // backfill): issue one on the first edit. findByIdAndUpdate doesn't run the
+    // pre-validate hook, so this is the only place it can happen on update.
+    if (!product.sku) {
+      product.sku = await ensureProductCode(Product, product._id);
+    }
 
     res.json({
       success: true,
