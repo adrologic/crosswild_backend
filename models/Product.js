@@ -57,9 +57,12 @@ const productSchema = new mongoose.Schema({
     default: 0,
     min: 0,
   },
+  // Minimum order quantity. The catalogue is bulk-only, so a new product is
+  // 100 pieces unless it is given its own figure. There is deliberately no
+  // maximum: orders have no upper limit.
   minOrderQuantity: {
     type: Number,
-    default: 1,
+    default: 100,
     min: 1,
   },
   stock: {
